@@ -1,7 +1,6 @@
-# MEAN Template
-This is a sample MEAN template for a generic web application that wants a robust
-frontend and an even more robust backend. This is an ongoing repository that will
-be routinely updated as new technologies arise and as I learn better practices.
+# Ken's Site
+This is Ken's website. It was created using Jeremy Keeler's MEAN-Template
+[here]{www.github.com/jer-keel/MEAN-Template}.
 
 ### Technologies
 The tech and instruments used in this project are as follows:
