@@ -9,6 +9,9 @@ app.config(['$routeProvider', '$locationProvider',
     }).when('/profile', {
       templateUrl: '/html/partials/profile.html',
       controller:'ProfileController'
+    }).when('/chem/genChem', {
+      templateUrl: '/html/partials/chem/genChem.html',
+      controller:'ChemController'
     }).otherwise({
       redirectTo: '/'
     });
@@ -22,6 +25,11 @@ app.controller('HomeController', ['$scope', '$location', '$http',
 ]);
 
 app.controller('ProfileController', ['$scope', '$location', '$http',
+  function($scope, $location, $http) {
+
+  }]);
+
+app.controller('ChemController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
 
   }
