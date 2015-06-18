@@ -26,7 +26,7 @@ app.controller('HomeController', ['$scope', '$location', '$http',
       console.log("Message is " + $scope.message);
       socket.emit('sendMessage', $scope.message);
     };
-    var socket = io.connect('http://localhost:3101');
+    var socket = io.connect('http://kenweaver.me:3101');
     
     socket.on('init', function(messages) {
       console.log('Received init');
