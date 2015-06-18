@@ -21,13 +21,14 @@ app.config(['$routeProvider', '$locationProvider',
 app.controller('HomeController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
     var isBottom = true;
-    $scope.messages = [];
     $scope.sendMessage = function() {
       console.log("Message is " + $scope.message);
       socket.emit('sendMessage', $scope.message);
     };
+
     var socket = io.connect('http://kenweaver.me:3101');
     
+    socket.emit('requestInit');
     socket.on('init', function(messages) {
       console.log('Received init');
       $scope.messages = messages;

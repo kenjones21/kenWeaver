@@ -5,10 +5,12 @@ var messages = ["Welcome! Please try to be civil you fucks."];
 
 io.on('connection', function(socket){
   console.log("received connection");
-  socket.emit('init', messages);
   socket.on('sendMessage', function(message) {
     messages.push(message);
     io.sockets.emit('receiveMessage', message);
+  });
+  socket.on('requestInit', function() {
+    socket.emit('init', messages);
   });
 });
 
