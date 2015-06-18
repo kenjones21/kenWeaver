@@ -1,4 +1,16 @@
 server = require('./src/server/app');
+var io = require('socket.io')(server);
+
+var messages = ["Welcome! Please try to be civil you fucks."];
+
+io.on('connection', function(socket){
+  console.log("received connection");
+  socket.emit('init', messages);
+  socket.on('sendMessage', function(message) {
+    messages.push(message);
+    io.sockets.emit('receiveMessage', message);
+  });
+});
 
 // Start the server (taken from Andy which is taken from Cloud9)
 server.listen(process.env.PORT || 3101, process.env.IP || '0.0.0.0', function() {
