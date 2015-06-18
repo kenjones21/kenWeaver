@@ -34,8 +34,9 @@ app.controller('HomeController', ['$scope', '$location', '$http',
     socket.removeAllListeners('receiveMessage');
     
     $scope.sendMessage = function() {
-      console.log("Message is " + $scope.message);
-      socket.emit('sendMessage', $scope.message);
+      message = {message: $scope.message, name: $scope.name}
+      socket.emit('sendMessage', message);
+      $scope.message = "";
     };
 
     socket.emit('requestInit');
@@ -56,8 +57,6 @@ app.controller('HomeController', ['$scope', '$location', '$http',
       else {
         isBottom = false;
       }
-      console.log(message);
-      console.log($scope.messages);
       $scope.messages.push(message);
       $scope.$apply();
       if (isBottom) {
