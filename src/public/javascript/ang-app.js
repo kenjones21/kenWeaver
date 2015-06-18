@@ -38,7 +38,6 @@ app.controller('HomeController', ['$scope', '$location', '$http',
       socket.emit('sendMessage', $scope.message);
     };
 
-    console.log("Requesting Initial Messages");
     socket.emit('requestInit');
     
     socket.on('init', function(messages) {
