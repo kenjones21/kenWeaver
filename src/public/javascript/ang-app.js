@@ -20,13 +20,27 @@ app.config(['$routeProvider', '$locationProvider',
 // This controll controls the home page!!!
 app.controller('HomeController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
+
+    var host = $location.$$host;
+    var port = $location.$$port;
+    console.log(port);
+    
+    var socket = io.connect(host + ':' + port);
+
     var isBottom = true;
+
+    // Remove listeners so we don't get duplicates.
+    socket.removeAllListeners('init');
+    socket.removeAllListeners('receiveMessage');
+    
     $scope.sendMessage = function() {
       console.log("Message is " + $scope.message);
       socket.emit('sendMessage', $scope.message);
     };
-    var socket = io.connect('http://localhost:3101');
+
+    console.log("Requesting Initial Messages");
     socket.emit('requestInit');
+    
     socket.on('init', function(messages) {
       console.log('Received init');
       $scope.messages = messages;
@@ -37,8 +51,6 @@ app.controller('HomeController', ['$scope', '$location', '$http',
     
     socket.on('receiveMessage', function(message) {
       var div = $("#messages");
-      console.log(div.scrollTop() + div.height());
-      console.log(div.prop('scrollHeight'));
       if(div.scrollTop() + div.height() == div.prop('scrollHeight')) {
         isBottom = true;
       }
@@ -46,6 +58,7 @@ app.controller('HomeController', ['$scope', '$location', '$http',
         isBottom = false;
       }
       console.log(message);
+      console.log($scope.messages);
       $scope.messages.push(message);
       $scope.$apply();
       if (isBottom) {
