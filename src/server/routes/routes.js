@@ -11,9 +11,4 @@ app.get('/', function(req, res) {
   res.sendFile(path.resolve('./src/public/html/index.html'));
 });
 
-app.post('/mail', function(req, res, next) {
-  console.log('Received mail');
-  console.log(req.body);
-});
-
 module.exports = router;
