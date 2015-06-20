@@ -14,6 +14,7 @@ app.get('/', function(req, res) {
 
 router.all('/mail', function(req, res) {
   console.log('Mail Request');
+  res.sendStatus(200);
 });
 
 /*
