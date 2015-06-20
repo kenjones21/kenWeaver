@@ -22,7 +22,6 @@ router.head('/mail', function(req, res) {
 router.post('/mail', function(req, res) {
   console.log('Received Mail');
   console.log(req.body);
-  res.sendStatus(200);
 
   var form = new multiparty.Form();
 
