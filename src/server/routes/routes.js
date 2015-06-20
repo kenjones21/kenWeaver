@@ -6,17 +6,28 @@
 // =============================================================================
 var path = require('path');
 var router = require('express').Router();
+var multiparty = require('multiparty');
 
 app.get('/', function(req, res) {
   res.sendFile(path.resolve('./src/public/html/index.html'));
 });
 
-router.get('/a', function(req, res) {
-  console.log('why isnt this working');
+router.head('/mail', function(req, res) {
+  console.log('Received mail HEAD request');
 });
 
 router.post('/mail', function(req, res) {
   console.log('Received Mail');
+
+  var form = new multiparty.Form();
+
+  form.parse(req, function(err, fields, files) {
+    res.writeHead(200, {'content-type': 'text/plain'});
+    res.write('received upload:\n\n');
+    res.end(util.inspect({fields: fields, files: files}));
+  });
+
+  return;
 }
 
 module.exports = router;
