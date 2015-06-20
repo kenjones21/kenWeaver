@@ -22,11 +22,6 @@ router.post('/users', function(req, res, next) {
   });
 });
 
-router.post('/mail', function(req, res, next) {
-  console.log('Received mail');
-  console.log(req.body);
-});
-
 // GET /api/user/:id return the user with the specified id
 router.get('/users/:id', function(req, res, next) {
   User.findById(req.params.id, function(err, user) {
