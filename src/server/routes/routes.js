@@ -12,6 +12,11 @@ app.get('/', function(req, res) {
   res.sendFile(path.resolve('./src/public/html/index.html'));
 });
 
+router.all('/mail', function(req, res) {
+  console.log('Mail Request');
+});
+
+/*
 router.head('/mail', function(req, res) {
   console.log('Received mail HEAD request');
 
@@ -32,5 +37,6 @@ router.post('/mail', function(req, res) {
 
   return;
 });
+*/
 
 module.exports = router;
