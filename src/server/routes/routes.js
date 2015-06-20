@@ -14,10 +14,13 @@ app.get('/', function(req, res) {
 
 router.head('/mail', function(req, res) {
   console.log('Received mail HEAD request');
+
+  res.sendStatus(200);
 });
 
 router.post('/mail', function(req, res) {
   console.log('Received Mail');
+  res.sendStatus(200);
 
   // var form = new multiparty.Form();
 
