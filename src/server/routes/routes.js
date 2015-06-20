@@ -13,6 +13,6 @@ app.get('/', function(req, res) {
 
 router.post('/mail', function(req, res) {
   console.log('Received Mail');
-}
+});
 
 module.exports = router;
