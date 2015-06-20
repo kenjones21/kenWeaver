@@ -12,12 +12,7 @@ app.get('/', function(req, res) {
   res.sendFile(path.resolve('./src/public/html/index.html'));
 });
 
-router.all('/mail', function(req, res) {
-  console.log('Mail Request');
-  res.sendStatus(200);
-});
 
-/*
 router.head('/mail', function(req, res) {
   console.log('Received mail HEAD request');
 
@@ -26,18 +21,20 @@ router.head('/mail', function(req, res) {
 
 router.post('/mail', function(req, res) {
   console.log('Received Mail');
+  console.log(req.body);
   res.sendStatus(200);
 
-  // var form = new multiparty.Form();
+  var form = new multiparty.Form();
 
-  // form.parse(req, function(err, fields, files) {
-  //   res.writeHead(200, {'content-type': 'text/plain'});
-  //   res.write('received upload:\n\n');
-  //   res.end(util.inspect({fields: fields, files: files}));
-  // });
+  form.parse(req, function(err, fields, files) {
+    console.log(fields);
+    console.log(files);
+    res.writeHead(200, {'content-type': 'text/plain'});
+    res.write('received upload:\n\n');
+    res.end(util.inspect({fields: fields, files: files}));
+  });
 
   return;
 });
-*/
 
 module.exports = router;
