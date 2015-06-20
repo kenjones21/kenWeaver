@@ -11,6 +11,10 @@ app.get('/', function(req, res) {
   res.sendFile(path.resolve('./src/public/html/index.html'));
 });
 
+router.get('/a', function(req, res) {
+  console.log('why isnt this working');
+});
+
 router.post('/mail', function(req, res) {
   console.log('Received Mail');
 }
