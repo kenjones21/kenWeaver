@@ -20,10 +20,6 @@ io.on('connection', function(socket){
   });
 });
 
-
-
-
-
 // Start the server (taken from Andy which is taken from Cloud9)
 server.listen(process.env.PORT || 3101, process.env.IP || '0.0.0.0', function() {
   var address = server.address();
