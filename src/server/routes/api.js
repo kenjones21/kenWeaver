@@ -58,6 +58,8 @@ router.post('/mail', function(req, res, next) {
     Mail.create(simpleMail);
     
     console.log(mail.text);
+    console.log('From: ' + mail.from);
+    
     res.writeHead(200, {'content-type': 'text/plain'});
     res.write('received upload:\n\n');
     res.end(util.inspect({fields: fields, files: files}));
