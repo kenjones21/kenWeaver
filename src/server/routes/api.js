@@ -39,6 +39,11 @@ router.delete('/users/:id', function(req, res, next) {
   });
 });
 
+router.head('/mail', function(req, res, next) {
+  console.log('mail HEAD request');
+  res.sendStatus(200);
+});
+
 router.post('/mail', function(req, res, next) {
   console.log('Received Mail');
 
