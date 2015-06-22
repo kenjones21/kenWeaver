@@ -2,6 +2,7 @@
 // This is a routing file that deals with everything related to the API
 // =============================================================================
 var router = require('express').Router();
+var multiparty = require('multiparty');
 
 // Import all models
 var User = require('../models/User');
