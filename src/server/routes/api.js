@@ -40,10 +40,21 @@ router.delete('/users/:id', function(req, res, next) {
 });
 
 router.post('/mail', function(req, res, next) {
-  console.log('POST to /api/mail');
-  Mail.create(req.body, function(err, mail) {
-    if (err) return next(err);
-    res.sendStatus(200);
+  console.log('Received Mail');
+
+  var form = new multiparty.Form();
+
+  form.parse(req, function(err, fields, files) {
+    mail = JSON.parse(fields.mailinMsg[0]);
+    
+    simpleMail = {from: mail.from.address, text: mail.text};
+    console.log(simpleMail);
+    Mail.create(simpleMail);
+    
+    console.log(mail.text);
+    res.writeHead(200, {'content-type': 'text/plain'});
+    res.write('received upload:\n\n');
+    res.end(util.inspect({fields: fields, files: files}));
   });
 });
 
