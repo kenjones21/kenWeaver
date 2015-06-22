@@ -15,7 +15,6 @@ app.get('/', function(req, res) {
 
 router.head('/mail', function(req, res) {
   console.log('Received mail HEAD request');
-
   res.sendStatus(200);
 });
 
@@ -26,7 +25,8 @@ router.post('/mail', function(req, res) {
   var form = new multiparty.Form();
 
   form.parse(req, function(err, fields, files) {
-    console.log(JSON.parse(fields.mailinMsg[0]).text);
+    mail = JSON.parse(fields.mailinMsg[0]);
+    console.log(mail.text);
     res.writeHead(200, {'content-type': 'text/plain'});
     res.write('received upload:\n\n');
     res.end(util.inspect({fields: fields, files: files}));

@@ -5,6 +5,7 @@ var router = require('express').Router();
 
 // Import all models
 var User = require('../models/User');
+var Mail = require('../models/Mail.js');
 
 // GET /api/user return all users
 router.get('/users', function(req, res, next) {
@@ -35,6 +36,14 @@ router.delete('/users/:id', function(req, res, next) {
   User.findByIdAndRemove(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
+  });
+});
+
+router.post('/mail', function(req, res, next) {
+  console.log('POST to /api/mail');
+  Mail.create(req.body, function(err, mail) {
+    if (err) return next(err);
+    res.sendStatus(200);
   });
 });
 
