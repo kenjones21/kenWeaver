@@ -34,7 +34,7 @@ app.controller('HomeController', ['$scope', '$location', '$http',
     socket.removeAllListeners('receiveMessage');
     
     $scope.sendMessage = function() {
-      message = {message: $scope.message, name: $scope.name}
+      message = {message: $scope.message, name: $scope.name};
       socket.emit('sendMessage', message);
       $scope.message = "";
     };

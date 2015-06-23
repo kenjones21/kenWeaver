@@ -3,6 +3,17 @@
 // =============================================================================
 var router = require('express').Router();
 var multiparty = require('multiparty');
+var nodemailer = require('nodemailer');
+var smtpTransport = require('nodemailer-smtp-transport');
+var config = require('../../../config/admin.js');
+
+var transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: config.gmail.user,
+        pass: config.gmail.pass
+    }
+});
 
 // Import all models
 var User = require('../models/User');
@@ -64,6 +75,24 @@ router.post('/mail', function(req, res, next) {
     res.write('received upload:\n\n');
     res.end(util.inspect({fields: fields, files: files}));
   });
+});
+
+router.post('/mailout', function(req, res, next) {
+  console.log('Mail out request');
+  var mailOptions = {
+    from: 'test@kenweaver.me', // sender address
+    to: 'kbweaver221@gmail.com', // list of receivers
+    subject: 'Hello ✔', // Subject line
+    text: 'Test', // plaintext body
+  };
+
+  transporter.sendMail(mailOptions, function(error, info){
+    if(error){
+      return console.log(error);
+    }
+    console.log('Message sent: ' + info.response);
+  });
+  res.sendStatus(200);
 });
 
 // Check to see if a user is logged in, if not, redirect them
