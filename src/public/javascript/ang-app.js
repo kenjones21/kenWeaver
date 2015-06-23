@@ -13,7 +13,7 @@ app.config(['$routeProvider', '$locationProvider',
       templateUrl: '/html/partials/chem/genChem.html',
       controller:'ChemController'
     }).when('/mail', {
-      templateUrl: '/html/partials/mail',
+      templateUrl: '/html/partials/mail.html',
       controller:'MailController'
     }).otherwise({
       redirectTo: '/'
@@ -89,7 +89,7 @@ app.controller('MailController', ['$scope', '$location', '$http',
       var port = $location.$$port;
       var postURL = host + ':' + port + '/api/mailout';
       console.log('POST request to ' + postURL);
-      message = {recipient: $scope.recipient, text: $scope.text};
+      
       $http.post(postURL, {text: $scope.text,
                            recipient: $scope.recipient}).
         success(function(data, status, headers, config) {
