@@ -7,13 +7,7 @@ var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 var config = require('../../../config/admin.js');
 
-var transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: config.gmail.user,
-        pass: config.gmail.pass
-    }
-});
+var transporter = nodemailer.createTransport();
 
 // Import all models
 var User = require('../models/User');
