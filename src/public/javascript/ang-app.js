@@ -12,6 +12,9 @@ app.config(['$routeProvider', '$locationProvider',
     }).when('/chem/genChem', {
       templateUrl: '/html/partials/chem/genChem.html',
       controller:'ChemController'
+    }).when('/mail', {
+      templateUrl: '/html/partials/mail',
+      controller:'MailController'
     }).otherwise({
       redirectTo: '/'
     });
@@ -74,6 +77,32 @@ app.controller('ProfileController', ['$scope', '$location', '$http',
 app.controller('ChemController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
 
+  }
+                                 ]);
+
+app.controller('MailController', ['$scope', '$location', '$http',
+  function($scope, $location, $http) {
+
+    $scope.sendMessage = function() {
+      console.log('Sending Message');
+      var host = $location.$$host;
+      var port = $location.$$port;
+      var postURL = host + ':' + port + '/api/mailout';
+      console.log('POST request to ' + postURL);
+      message = {recipient: $scope.recipient, text: $scope.text};
+      $http.post(postURL, {text: $scope.text,
+                           recipient: $scope.recipient}).
+        success(function(data, status, headers, config) {
+          console.log('success');
+          // this callback will be called asynchronously
+          // when the response is available
+        }).
+        error(function(data, status, headers, config) {
+          console.log('error');
+          // called asynchronously if an error occurs
+          // or server returns response with an error status.
+        });
+    };
   }
 ]);
 

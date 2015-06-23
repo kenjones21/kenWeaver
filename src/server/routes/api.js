@@ -73,11 +73,14 @@ router.post('/mail', function(req, res, next) {
 
 router.post('/mailout', function(req, res, next) {
   console.log('Mail out request');
+  var recipient = req.body.recipient;
+  var subject = req.body.subject;
+  var text = req.body.text;
   var mailOptions = {
-    from: 'test@kenweaver.me', // sender address
-    to: 'kbweaver221@gmail.com', // list of receivers
-    subject: 'Hello ✔', // Subject line
-    text: 'Test', // plaintext body
+    from: 'no-reply@kenweaver.me', // sender address
+    to: recipient, // list of receivers
+    subject: 'Test', // Subject line
+    text: text, // plaintext body
   };
 
   transporter.sendMail(mailOptions, function(error, info){
