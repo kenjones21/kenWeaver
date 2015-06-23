@@ -76,6 +76,7 @@ router.post('/mailout', function(req, res, next) {
   var recipient = req.body.recipient;
   var subject = req.body.subject;
   var text = req.body.text;
+  console.log('Mail to: ' + recipient);
   var mailOptions = {
     from: 'no-reply@kenweaver.me', // sender address
     to: recipient, // list of receivers

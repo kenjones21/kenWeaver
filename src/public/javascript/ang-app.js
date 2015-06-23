@@ -83,25 +83,29 @@ app.controller('ChemController', ['$scope', '$location', '$http',
 app.controller('MailController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
 
-    $scope.sendMessage = function() {
+    console.log('Loaded mail controller');
+    $scope.sendMail = function() {
       console.log('Sending Message');
       var host = $location.$$host;
       var port = $location.$$port;
-      var postURL = host + ':' + port + '/api/mailout';
+      var postURL = '/api/mailout';
       console.log('POST request to ' + postURL);
-      
-      $http.post(postURL, {text: $scope.text,
-                           recipient: $scope.recipient}).
-        success(function(data, status, headers, config) {
-          console.log('success');
-          // this callback will be called asynchronously
-          // when the response is available
-        }).
-        error(function(data, status, headers, config) {
-          console.log('error');
-          // called asynchronously if an error occurs
-          // or server returns response with an error status.
-        });
+      console.log($scope.text);
+      console.log($scope.recipient);
+
+      mailObject = {text: $scope.text,
+                    recipient: $scope.recipient};
+      $http({
+        method: 'POST',
+        url: postURL,
+        dataType: 'json',
+        data: mailObject,
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' }
+      }).success(function (data) {
+        console.log(data);
+      }).error(function (data) {
+        console.log(data);
+      });
     };
   }
 ]);
