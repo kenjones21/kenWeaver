@@ -64,12 +64,12 @@ router.post('/mail', function(req, res, next) {
   form.parse(req, function(err, fields, files) {
     mail = JSON.parse(fields.mailinMsg[0]);
     
-    simpleMail = {from: mail.from.address, text: mail.text};
+    simpleMail = {from: mail.from[0].address, text: mail.text};
     console.log(simpleMail);
     Mail.create(simpleMail);
     
     console.log(mail.text);
-    console.log('From: ' + mail.from[0]);
+    console.log('From: ' + mail.from[0].address);
     
     res.writeHead(200, {'content-type': 'text/plain'});
     res.write('received upload:\n\n');
