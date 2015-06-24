@@ -15,12 +15,12 @@
     </p>
   </div>
   
-  <form class="form" ng-submit="sendMail()">
+  <form class="form" ng-submit="sendMail()" id="emailForm">
     <div class="form-group">
       <label for="recipient">To</label>
       <input type="text" class="form-control" id="recipient" placeholder="To" ng-model="recipient">
       <label for="text">Text</label>
-      <input type="text" class="form-control" id="text" placeholder="Text" ng-model="text">
+      <textarea class="form-control" id="text" placeholder="Text" ng-model="text" form="usrForm"></textarea>
       <button type="submit" class="btn btn-default">Send email</button>
   </form>
 </div>
