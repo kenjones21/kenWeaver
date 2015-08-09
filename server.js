@@ -2,7 +2,7 @@ server = require('./src/server/app');
 var io = require('socket.io')(server);
 
 var messages = [{name: 'Server',
-                 message: "Welcome! Please try to be civil you fucks."
+                 message: "Welcome! Please try to be civil."
                 }];
 
 io.on('connection', function(socket){
