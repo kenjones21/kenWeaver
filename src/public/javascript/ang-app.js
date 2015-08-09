@@ -112,4 +112,3 @@ app.controller('MailController', ['$scope', '$location', '$http',
 
 // Simple logging to make sure everything loaded correctly
 console.log('Angular has been loaded!');
-console.log('Test lint');
