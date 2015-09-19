@@ -15,6 +15,9 @@ app.config(['$routeProvider', '$locationProvider',
     }).when('/mail', {
       templateUrl: '/html/partials/mail.html',
       controller:'MailController'
+    }).when('/movie', {
+      templateUrl: '/html/partials/movie.html',
+      controller:'MovieController'
     }).otherwise({
       redirectTo: '/'
     });
@@ -78,7 +81,7 @@ app.controller('ChemController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
 
   }
-                                 ]);
+]);
 
 app.controller('MailController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
@@ -106,6 +109,21 @@ app.controller('MailController', ['$scope', '$location', '$http',
       }).error(function (data) {
         console.log(data);
       });
+    };
+  }
+]);
+
+app.controller('MovieController', ['$scope', '$location', '$http', '$sce',
+  function($scope, $location, $http, $sce) {
+    console.log('Loaded movie controller');
+
+    $scope.fileChange = function(el) {
+      console.log('File Changed');
+      movie = el.files[0];
+      var vidURL = URL.createObjectURL(movie);
+      console.log(vidURL);
+      $scope.vidURL = $sce.trustAsResourceUrl(vidURL);
+      $scope.$apply();
     };
   }
 ]);

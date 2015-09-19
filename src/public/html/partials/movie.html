@@ -1,0 +1,10 @@
+<div class="container">
+  <header role="banner">
+    <h1>Movie!</h1>
+  </header>
+
+  <input type="file" accept="video/*"/ ng-model="video"
+         onchange="angular.element(this).scope().fileChange(this)">
+  <video src="{{vidURL}}" controls autoplay></video>
+  <p>{{vidURL}}</p>
+</div>
