@@ -117,6 +117,9 @@ app.controller('MovieController', ['$scope', '$location', '$http', '$sce',
   function($scope, $location, $http, $sce) {
     console.log('Loaded movie controller');
 
+    $scope.haveVideo = false;
+    var vidTime = 0;
+
     $scope.fileChange = function(el) {
       console.log('File Changed');
       movie = el.files[0];
@@ -124,7 +127,67 @@ app.controller('MovieController', ['$scope', '$location', '$http', '$sce',
       console.log(vidURL);
       $scope.vidURL = $sce.trustAsResourceUrl(vidURL);
       $scope.$apply();
+      $scope.haveVideo = true;
     };
+
+    // Socket stuff
+
+    var host = $location.$$host;
+    var port = $location.$$port;
+    console.log(port);
+    
+    var socket = io.connect(host + ':' + port);
+
+    // Remove listeners so we don't get duplicates.
+    // socket.removeAllListeners('init');
+
+    // Function called when someone plays a video
+    var playVid = function(currentTime) {
+      socket.emit('sendPlay', currentTime);
+    };
+
+    // Function called when someone pauses a video
+    var pauseVid = function(currentTime) {
+      socket.emit('sendPause', currentTime);
+    };
+
+    socket.on('recPlay', function(time) {
+      console.log('Received play, time = ' + time);
+      $('#video').get(0).play();
+    });
+
+    socket.on('recPause', function(time) {
+      console.log('Reveived pause, time = ' + time);
+      $('#video').get(0).pause();
+      $('#video').get(0).currentTime = time;
+      
+    });
+    
+    socket.emit('movieInit');
+
+    // Video events
+    $("#video").on(
+      'timeupdate',
+      function(event) {
+        console.log(this.currentTime);
+        vidTime = this.currentTime;
+      });
+    
+    $("#video").on(
+      'pause',
+      function(event) {
+        console.log('Paused');
+        console.log(this.currentTime);
+        pauseVid(this.currentTime);
+      });
+    
+    $("#video").on(
+      'play',
+      function(event) {
+        console.log('Played');
+        console.log(this.currentTime);
+        playVid(this.currentTime);
+      });
   }
 ]);
 

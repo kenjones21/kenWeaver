@@ -18,6 +18,18 @@ io.on('connection', function(socket){
     socket.emit('init', messages);
     console.log("Sending init");
   });
+
+  socket.on('movieInit', function() {
+    socket.join('movie');
+  });
+
+  socket.on('sendPlay', function(time) {
+    io.to('movie').emit('recPlay', time);
+  });
+
+  socket.on('sendPause', function(time) {
+    io.to('movie').emit('recPause', time);
+  });
 });
 
 // Start the server (taken from Andy which is taken from Cloud9)

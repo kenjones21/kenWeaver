@@ -5,6 +5,6 @@
 
   <input type="file" accept="video/*"/ ng-model="video"
          onchange="angular.element(this).scope().fileChange(this)">
-  <video src="{{vidURL}}" controls autoplay></video>
+  <video id="video" src="{{vidURL}}" controls autoplay></video>
   <p>{{vidURL}}</p>
 </div>
