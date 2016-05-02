@@ -18,6 +18,9 @@ app.config(['$routeProvider', '$locationProvider',
     }).when('/movie', {
       templateUrl: '/html/partials/movie.html',
       controller:'MovieController'
+    }).when('/minecraft',{
+	templateUrl: '/html/partials/minecraft.html',
+	controller: 'MinecraftController'
     }).otherwise({
       redirectTo: '/'
     });
@@ -78,6 +81,12 @@ app.controller('ProfileController', ['$scope', '$location', '$http',
   }]);
 
 app.controller('ChemController', ['$scope', '$location', '$http',
+  function($scope, $location, $http) {
+
+  }
+				 ]);
+
+app.controller('MinecraftController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
 
   }
