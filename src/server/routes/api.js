@@ -22,7 +22,7 @@ router.get('/users', function(req, res, next) {
 });
 
 router.get('/overviewer.css', function(req, res, next) {
-  res.sendFile('overviewer.css', { root : './'});
+  res.sendFile('overviewer.css', { root : './src/public/html/Test/overviewer.css'});
 });
 
 // POST /api/user create a new user in the database
