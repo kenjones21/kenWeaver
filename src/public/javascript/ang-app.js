@@ -22,7 +22,7 @@ app.config(['$routeProvider', '$locationProvider',
 	templateUrl: '/html/partials/minecraft.html',
 	controller: 'MinecraftController'
     }).when('/minecraft/map',{
-	templateUrl: '/html/Test',
+	templateUrl: '/html/Test/index.html',
 	controller: 'MinecraftMapController'
     }).otherwise({
       redirectTo: '/'
