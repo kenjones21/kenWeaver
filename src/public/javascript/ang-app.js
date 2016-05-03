@@ -21,6 +21,9 @@ app.config(['$routeProvider', '$locationProvider',
     }).when('/minecraft',{
 	templateUrl: '/html/partials/minecraft.html',
 	controller: 'MinecraftController'
+    }).when('/minecraft/map',{
+	templateUrl: '/html/Test',
+	controller: 'MinecraftMapController'
     }).otherwise({
       redirectTo: '/'
     });
@@ -87,6 +90,12 @@ app.controller('ChemController', ['$scope', '$location', '$http',
 				 ]);
 
 app.controller('MinecraftController', ['$scope', '$location', '$http',
+  function($scope, $location, $http) {
+
+  }
+				      ]);
+
+app.controller('MinecraftMapController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
 
   }
