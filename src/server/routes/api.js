@@ -21,10 +21,8 @@ router.get('/users', function(req, res, next) {
   });
 });
 
-// GET /api/user return all users
 router.get('/overviewer.css', function(req, res, next) {
-    res.sendFile('log.log', { root : __dirname});
-  });
+  res.sendFile('log.log', { root : __dirname});
 });
 
 // POST /api/user create a new user in the database
