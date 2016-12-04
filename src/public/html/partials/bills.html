@@ -5,9 +5,40 @@
 
   <form class="form-inline" ng-submit="submitForm()">
     <div class="form-group">
-      <label for="Label">Label</label>
-      <input type="text" class="form-control" id="Label" placeholder="Label" ng-model="billLabel">
+      <label for="Label">Item</label>
+      <input type="text" class="form-control" id="Label" placeholder="Name" ng-model="billLabel">
+      <label for="Person">Who paid?</label>
+      <select class="form-control" id="Person" ng-model="billPayer">
+	<option>Ken</option>
+	<option>Mike</option>
+	<option>Sarah</option>
+      </select>
+      <label for="Category">Category</label>
+      <select class="form-control" id="Category" ng-model="billCategory">
+	<option>Utilities</option>
+	<option>Groceries</option>
+	<option>Misc</option>
+      </select>
+      <label for="Amount">Amount</label>
+      <input type="text" class="form-control" id="Amount" placeholder="$0.00" ng-model="billTotal">
       <button type="submit" class="btn btn-default">Submit Item</button>
     </div>
   </form>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Who paid?</th>
+        <th>Category</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="x in bills">
+	<td>{{ x.name }}</td>
+	<td>{{ x.payed }}</td>
+	<td>{{ x.total }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

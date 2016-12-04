@@ -7,6 +7,7 @@ var billSchema = new Schema({
   payed: String,
   pays: [String], // Note this should include payer, where applicable
   notes: String,
+  category: String,  
   date: Date
 });
 

@@ -137,7 +137,13 @@ app.controller('BillsController', ['$scope', '$location', '$http',
       console.log('Loaded bills controller');
       $scope.submitForm = function() {
 	  console.log("It worked!")
-	  console.log($scope.billLabel)
+      }
+      $scope.submitForm = function() {
+	  billObject = {name: $scope.billLabel,
+			total: $scope.billTotal,
+			payed: $scope.billPayer,
+			category: $scope.billCategory}
+	  console.log(billObject.name)
       }
   }
 ]);
