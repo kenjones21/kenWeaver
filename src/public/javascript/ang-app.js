@@ -21,9 +21,9 @@ app.config(['$routeProvider', '$locationProvider',
     }).when('/minecraft',{
 	templateUrl: '/html/partials/minecraft.html',
 	controller: 'MinecraftController'
-    }).when('/minecraft/map',{
-	templateUrl: '/html/Test/index.html',
-	controller: 'MinecraftMapController'
+    }).when('/bills',{
+	templateUrl: '/html/partials/bills.html',
+	controller: 'BillsController'
     }).otherwise({
       redirectTo: '/'
     });
@@ -128,6 +128,17 @@ app.controller('MailController', ['$scope', '$location', '$http',
         console.log(data);
       });
     };
+  }
+]);
+
+app.controller('BillsController', ['$scope', '$location', '$http',
+  function($scope, $location, $http) {
+
+      console.log('Loaded bills controller');
+      $scope.submitForm = function() {
+	  console.log("It worked!")
+	  console.log($scope.billLabel)
+      }
   }
 ]);
 

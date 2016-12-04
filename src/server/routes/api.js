@@ -12,6 +12,7 @@ var transporter = nodemailer.createTransport();
 // Import all models
 var User = require('../models/User');
 var Mail = require('../models/Mail.js');
+var Bill = require('../models/Bill.js');
 
 // GET /api/user return all users
 router.get('/users', function(req, res, next) {
@@ -23,6 +24,13 @@ router.get('/users', function(req, res, next) {
 
 router.get('/overviewer.css', function(req, res, next) {
   res.sendFile('overviewer.css', { root : './src/public/html/Test'});
+});
+
+router.get('/bills', function(req, res, next) {
+  bill.find(function(err, bills) {
+    if (err) return next(err);
+    res.json(bills);
+  });
 });
 
 // POST /api/user create a new user in the database
