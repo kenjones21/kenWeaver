@@ -134,16 +134,69 @@ app.controller('MailController', ['$scope', '$location', '$http',
 app.controller('BillsController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
 
-      console.log('Loaded bills controller');
-      $scope.submitForm = function() {
-	  console.log("It worked!")
+      var loadBills = function() {
+	  $scope.bills = []
+	  $http({
+	      method: 'GET',
+              url: '/api/bills',
+              dataType: 'json'
+	  }).success(function (data) {
+	      data.forEach(function(datum) {
+		  console.log(datum)
+		  $scope.bills.push(datum)
+	      });
+	  }).error(function (data) {
+	      console.log("Bill Error")
+              console.log(data);
+	  });
       }
+
+      $scope.dateFormat = function(date) {
+	  // Takes default date string and reformats
+	  var date = new Date(date)
+	  var month = (date.getMonth() + 1).toString()
+	  var day = date.getDay().toString()
+	  var year = date.getFullYear().toString()
+	  return month + "-" + day + ", " + year
+      }
+      loadBills()
+      console.log('Loaded bills controller');
       $scope.submitForm = function() {
 	  billObject = {name: $scope.billLabel,
 			total: $scope.billTotal,
 			payed: $scope.billPayer,
 			category: $scope.billCategory}
+	  $http({
+              method: 'POST',
+              url: '/api/billout',
+              dataType: 'json',
+              data: billObject,
+              headers: { 'Content-Type': 'application/json; charset=UTF-8' }
+	  }).success(function (data) {
+              console.log(data);
+	      loadBills()
+	  }).error(function (data) {
+	      console.log("Bill Error")
+              console.log(data);
+	  });
 	  console.log(billObject.name)
+      }
+      
+      $scope.billDel = function(bill) {
+	  console.log("Deleting " + bill.name)
+	  $http({
+              method: 'POST',
+              url: '/api/billdel',
+              dataType: 'json',
+              data: bill,
+              headers: { 'Content-Type': 'application/json; charset=UTF-8' }
+	  }).success(function (data) {
+              console.log(data);
+	      loadBills()
+	  }).error(function (data) {
+	      console.log("Bill Error")
+              console.log(data);
+	  });
       }
   }
 ]);

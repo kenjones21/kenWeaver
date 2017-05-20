@@ -8,7 +8,7 @@ var billSchema = new Schema({
   pays: [String], // Note this should include payer, where applicable
   notes: String,
   category: String,  
-  date: Date
+  date: {type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Bill', billSchema);

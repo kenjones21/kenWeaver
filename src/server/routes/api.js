@@ -27,7 +27,7 @@ router.get('/overviewer.css', function(req, res, next) {
 });
 
 router.get('/bills', function(req, res, next) {
-  bill.find(function(err, bills) {
+  Bill.find(function(err, bills) {
     if (err) return next(err);
     res.json(bills);
   });
@@ -103,6 +103,22 @@ router.post('/mailout', function(req, res, next) {
     console.log('Message sent: ' + info.response);
   });
   res.sendStatus(200);
+});
+
+router.post('/billout', function(req, res, next) {
+  console.log("Bill Out Request")
+  Bill.create(req.body, function(err, post) {
+    if (err) return next(err);
+      res.json(post);
+  }); 
+});
+
+router.post('/billdel', function(req, res, next) {
+    console.log("Bill Delete Request")
+    Bill.remove(req.body, function(err, post) {
+	if (err) return next(err);
+	res.json(post)
+    });
 });
 
 // Check to see if a user is logged in, if not, redirect them
