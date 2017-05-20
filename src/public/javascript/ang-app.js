@@ -155,7 +155,7 @@ app.controller('BillsController', ['$scope', '$location', '$http',
 	  // Takes default date string and reformats
 	  var date = new Date(date)
 	  var month = (date.getMonth() + 1).toString()
-	  var day = date.getDay().toString()
+	  var day = date.getDate().toString()
 	  var year = date.getFullYear().toString()
 	  return month + "-" + day + ", " + year
       }
