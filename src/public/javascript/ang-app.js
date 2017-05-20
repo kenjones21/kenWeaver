@@ -162,6 +162,9 @@ app.controller('BillsController', ['$scope', '$location', '$http',
       loadBills()
       console.log('Loaded bills controller');
       $scope.submitForm = function() {
+	  if ($scope.billTotal[0] == "$") {
+	      $scope.billTotal = $scope.billTotal.substring(1)
+	  }
 	  billObject = {name: $scope.billLabel,
 			total: $scope.billTotal,
 			payed: $scope.billPayer,
