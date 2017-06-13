@@ -134,8 +134,10 @@ app.controller('MailController', ['$scope', '$location', '$http',
 app.controller('BillsController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
 
+      $scope.isMouseDown = false;
       var loadBills = function() {
 	  $scope.bills = []
+	  $scope.selected = [] // Background colors for each bill
 	  $http({
 	      method: 'GET',
               url: '/api/bills',
@@ -144,6 +146,7 @@ app.controller('BillsController', ['$scope', '$location', '$http',
 	      data.forEach(function(datum) {
 		  console.log(datum)
 		  $scope.bills.push(datum)
+		  $scope.selected.push(false)
 	      });
 	  }).error(function (data) {
 	      console.log("Bill Error")
@@ -159,6 +162,42 @@ app.controller('BillsController', ['$scope', '$location', '$http',
 	  var year = date.getFullYear().toString()
 	  return month + "-" + day + ", " + year
       }
+
+      $scope.highlightIfDown = function(index) {
+	  if ($scope.isMouseDown) {
+	      $scope.selected[index] = '29BDC1'
+	  }
+      }
+
+      $scope.highlight = function(index) {
+	  $scope.selected[index] = true
+      }
+
+      $scope.clearSelected = function() {
+	  for (i = 0; i < $scope.selected.length; i++) {
+	      $scope.selected[i] = false
+	  }
+      }
+
+      $scope.getColor = function(index) {
+	  if ($scope.selected[index]) {
+	      return '29BDC1'
+	  }
+	  else {
+	      return 'FFFFFF'
+	  }
+      }
+
+      $scope.sumBills = function() {
+	  sum = 0
+	  for (i = 0; i < $scope.bills.length; i++) {
+	      if ($scope.selected[i]) {
+		  sum += $scope.bills[i].total
+	      }
+	  }
+	  alert("Sum is " + sum.toString())
+      }
+      
       loadBills()
       console.log('Loaded bills controller');
       $scope.submitForm = function() {
