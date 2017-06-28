@@ -16,3 +16,24 @@ h1 {
   -ms-user-select: none;
   user-select: none;
 }
+.navbar1 {
+  background: #000;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  border: 0;
+  height: 50px;
+  width: 100%;
+}
+.navbutton {
+  background: #000;
+  height: 100%;
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+}
+.navbutton:hover {
+  background-color: #808080;
+}
