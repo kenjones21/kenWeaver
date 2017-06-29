@@ -5,7 +5,10 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     jshint: {
-      all: js_files
+	all: js_files,
+	options: {
+	    asi: true
+	}
     },
 
     stylus: {

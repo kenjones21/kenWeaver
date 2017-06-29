@@ -156,10 +156,10 @@ app.controller('BillsController', ['$scope', '$location', '$http',
 
       $scope.dateFormat = function(date) {
 	  // Takes default date string and reformats
-	  var date = new Date(date)
-	  var month = (date.getMonth() + 1).toString()
-	  var day = date.getDate().toString()
-	  var year = date.getFullYear().toString()
+	  var date_obj = new Date(date)
+	  var month = (date_obj.getMonth() + 1).toString()
+	  var day = date_obj.getDate().toString()
+	  var year = date_obj.getFullYear().toString()
 	  return month + "-" + day + ", " + year
       }
 
