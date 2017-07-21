@@ -24,6 +24,9 @@ app.config(['$routeProvider', '$locationProvider',
     }).when('/bills',{
 	templateUrl: '/html/partials/bills.html',
 	controller: 'BillsController'
+    }).when('/blog', {
+	templateUrl: '/html/partials/blog.html',
+	controller: 'BlogController'
     }).otherwise({
       redirectTo: '/'
     });
@@ -77,6 +80,14 @@ app.controller('HomeController', ['$scope', '$location', '$http',
     });
   }
 ]);
+
+app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll',
+  function($scope, $location, $http, $anchorScroll) {
+      $anchorScroll()
+      $scope.toBottom = function() {
+	  $location.hash('bottom')
+      }
+  }]);
 
 app.controller('ProfileController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
