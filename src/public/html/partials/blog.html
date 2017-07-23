@@ -1,5 +1,16 @@
 <div ng-include="'html/navBar.html'"></div>
 
 <div class="container">
-  <button class="btn blogbutton" ng-click="toBottom()">Temp</button>
+  <h1 class="blogHeader">Ken's Blog</h1>
+  <h3 class="blogUnderHeader">Philadelphia's Climate and Politics</h3>
+  <button class="btn blogbutton" id="20170722"
+	  type="button" ng-click="toggle('20170722')">Temp</button>
+  <p class="blogPost" id="20170722-post" ng-show="showDict['post-20170722']">
+    blog post here
+  </p>
+  <h6 class="btn blogbutton" id="20170723"
+	  type="button" ng-click="toggle('20170723')">Temp</h6>
+  <p class="blogPost" id="20170723-post" ng-show="showDict['post-20170723']">
+    blog post here
+  </p>
 </div>

@@ -83,9 +83,27 @@ app.controller('HomeController', ['$scope', '$location', '$http',
 
 app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll',
   function($scope, $location, $http, $anchorScroll) {
+      console.log("Running this bullshit")
+      $scope.showDict = {}
       $anchorScroll()
       $scope.toBottom = function() {
 	  $location.hash('bottom')
+      }
+      $scope.toggle = function(id) {
+	  console.log("Function call")
+	  $location.hash(id)
+	  postString = "post-" + id
+	  if ($scope.showDict[postString]) {
+	      $scope.showDict[postString] = false
+	  }
+	  else {
+	      $scope.showDict[postString] = true
+	  }
+	  console.log($scope.showDict[postString])
+      }
+      if ($location.hash() != "") {
+	  console.log("We have a hash")
+	  $scope.toggle($location.hash())
       }
   }]);
 
