@@ -101,10 +101,14 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  }
 	  console.log($scope.showDict[postString])
       }
-      if ($location.hash() != "") {
+      // Toggle the hash if we have it. Done on load or whenever hash changes
+      if ($location.hash() !== "") {
 	  console.log("We have a hash")
 	  $scope.toggle($location.hash())
       }
+      d3.csv("/api/emissions_csv", function(error, data) {
+	  console.log(data)
+      });
   }]);
 
 app.controller('ProfileController', ['$scope', '$location', '$http',

@@ -2,15 +2,50 @@
 
 <div class="container">
   <h1 class="blogHeader">Ken's Blog</h1>
-  <h3 class="blogUnderHeader">Philadelphia's Climate and Politics</h3>
+  <h3 class="blogUnderHeader">Philadelphia's Climate Politics</h3>
   <button class="btn blogbutton" id="20170722"
-	  type="button" ng-click="toggle('20170722')">Temp</button>
-  <p class="blogPost" id="20170722-post" ng-show="showDict['post-20170722']">
-    blog post here
-  </p>
-  <h6 class="btn blogbutton" id="20170723"
-	  type="button" ng-click="toggle('20170723')">Temp</h6>
-  <p class="blogPost" id="20170723-post" ng-show="showDict['post-20170723']">
-    blog post here
-  </p>
+	  type="button" ng-click="toggle('20170722')">Where We're At</button>
+  <div class="blogPost" id="20170722-post" ng-show="showDict['post-20170722']">
+    <p>
+      Many of you will know that a recently made a rather abrupt career decision
+      to leave graduate school. Part of this decision was a personal choice - I
+      have struggled somewhat to focus on my research - but part of the decision
+      was motivated by outside forces. Namely, over the past 8 months or so, I've
+      been in a state of sort of sustained panic about climate change. I believe
+      I can trace this feeling back to being introduced to a presentation by Kevin
+      Anderson on carbon budgets, as absurd as that
+      sounds. I've embedded the video below, but it's quite long so I'll try to
+      walk through the logic in this post instead.
+    </p>
+
+    <p>
+      I suspect many people who have politics that are similar to mine probably
+      have had climate change rattling around in their head for quite some time.
+      It's difficult to really understand how serious it is - or how pressing -
+      without understanding carbon budgets, and how they constrain the choices
+      we make every day.
+    </p>
+
+    <p>
+      The last IPCC Report, finalized in 2014, reported a carbon budget for
+      various temperature thresholds (1.5, 2, and 3 degrees Celsius). For these
+      temperature targets, it details the amount of carbon dioxide the world can
+      emit to have a certain chance at staying under that threshold. The
+      international community has decided that 2 degrees Celsius is an appropriate
+      threshold that delineates dangerous climate change from not so dangerous
+      (acceptable?) climate change. There was a push by some countries to get a
+      1.5 degree target included during the latests negotiations in Paris, as for
+      some places 2 degrees Celsius may well represent a death sentence, but for
+      now we'll focus on the carbon budgets for two degrees.
+    </p>
+
+    <img src="/images/AR5_CarbonBudget.png", class="img-responsive center-block"
+	 title="Carbon budgets for various temperature thresholds and probabilities">
+
+    <p>
+      For 2 degrees Celsius, the IPCC gives a budget of 1000 Gigatons of CO2 from
+      2011 on. Since we have a budget, we can work out how fast the world would
+      need to decarbonize given delayed action to a certain date. 
+    </p>
+  </div>
 </div>

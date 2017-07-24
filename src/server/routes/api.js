@@ -121,6 +121,12 @@ router.post('/billdel', function(req, res, next) {
     });
 });
 
+router.get('/emissions_csv', function(req, res, next) {
+    console.log("Emissions csv request")
+    res.sendFile("./Carbon_Budget.csv", {root: "."})
+    console.log("Sent file")
+});
+
 // Check to see if a user is logged in, if not, redirect them
 function loggedIn(req, res, next) {
   if (req.user) {

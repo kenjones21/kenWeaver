@@ -4,6 +4,9 @@ node_modules/
 *.css.map
 *~
 src/public/html/Test/
+*.csv
+*.png
+**/d3.min.js
 
 # --------------------
 # Standard files to ignore
