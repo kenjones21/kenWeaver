@@ -106,8 +106,73 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  console.log("We have a hash")
 	  $scope.toggle($location.hash())
       }
-      d3.csv("/api/emissions_csv", function(error, data) {
-	  console.log(data)
+      function toNum(d) {
+	  // Assume all values can be converted
+	  for (var key in d) {
+	      d[key] = +d[key]
+	  }
+	  return d
+      }
+      var fixCSV = function(data) {
+	  return_data = []
+	  for(i = 1; i < data.length; i++) {
+	      return_data.push(toNum(data[i]))
+	  }
+	  return return_data
+      }
+
+      function makeChart() {
+
+	  var width = 1000,
+	      height = 500
+
+	  var y = d3.scaleLinear()
+	      .range([height, 0]);
+
+	  var margin = {top: 30, bottom: 30, left: 30, right: 30}
+
+	  width = d3.select("#post-20170722").style("width")
+	  width = +(width.substr(0, width.length-2))
+	  width = width - margin.left - margin.right
+	  height = height - margin.top - margin.bottom
+	  console.log(width)
+	  console.log(typeof width)
+
+	  var chart = d3.select(".chart")
+	      .attr("width", width + margin.left + margin.right)
+	      .attr("height", height + margin.top + margin.bottom)
+	      .append("g")
+	      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	  console.log("Below")
+	  
+	  d3.csv("/api/emissions_csv", toNum, function(error, data) {
+	      y.domain([0, d3.max(data, function(d) { return d.Total; })]);
+
+	      //chart.attr("height", barHeight * data.length);
+	      var barWidth = width / data.length;
+
+	      var bar = chart.selectAll("g")
+		  .data(data)
+		  .enter().append("g")
+		  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
+
+	      bar.append("rect")
+		  .attr("y", function(d) {return y(d.Total);})
+		  .attr("height", function(d) {return height - y(d.Total); })
+		  .attr("width", barWidth - 1);
+
+	      bar.append("text")
+		  .attr("x", barWidth / 2)
+		  .attr("y", function(d) { return y(d.Total) + 30})
+		  .attr("dy", ".35em")
+		  .text(function(d) { return d.Total; });
+	  });
+      }
+      makeChart()
+      $(window).resize(function() {
+	  console.log("Resize")
+	  makeChart()
       });
   }]);
 
