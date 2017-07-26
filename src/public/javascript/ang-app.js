@@ -123,11 +123,7 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 
       function makeChart() {
 
-	  var width = 1000,
-	      height = 500
-
-	  var y = d3.scaleLinear()
-	      .range([height, 0]);
+	  var height = 500
 
 	  var margin = {top: 30, bottom: 30, left: 30, right: 30}
 
@@ -135,6 +131,15 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  width = +(width.substr(0, width.length-2))
 	  width = width - margin.left - margin.right
 	  height = height - margin.top - margin.bottom
+
+	  var x = d3.scaleBand()
+	      .range([0, width])
+	      .padding(0.1)
+	      .round(true)
+
+	  var y = d3.scaleLinear()
+	      .range([height, 0]);
+
 	  console.log(width)
 	  console.log(typeof width)
 
@@ -147,7 +152,10 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  console.log("Below")
 	  
 	  d3.csv("/api/emissions_csv", toNum, function(error, data) {
+	      x.domain(data.map(function(d) {return d.Year}))
 	      y.domain([0, d3.max(data, function(d) { return d.Total; })]);
+
+	      var xAxis = d3.axisBottom(x)
 
 	      //chart.attr("height", barHeight * data.length);
 	      var barWidth = width / data.length;
@@ -155,18 +163,23 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      var bar = chart.selectAll("g")
 		  .data(data)
 		  .enter().append("g")
-		  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
+		  .attr("transform", function(d, i) { return "translate(" + x(d.Year) + ",0)"; });
 
 	      bar.append("rect")
 		  .attr("y", function(d) {return y(d.Total);})
 		  .attr("height", function(d) {return height - y(d.Total); })
-		  .attr("width", barWidth - 1);
+		  .attr("width", x.bandwidth());
 
 	      bar.append("text")
 		  .attr("x", barWidth / 2)
 		  .attr("y", function(d) { return y(d.Total) + 30})
 		  .attr("dy", ".35em")
 		  .text(function(d) { return d.Total; });
+
+	      chart.append("g")
+		  .attr("class", "x axis")
+		  .attr("transform", "translate(0," + height + ")")
+		  .call(xAxis);
 	  });
       }
       makeChart()
