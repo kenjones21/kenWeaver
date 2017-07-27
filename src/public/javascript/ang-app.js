@@ -123,6 +123,37 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 
       function makeChart() {
 
+	  function futureEmissions(actYear, emissionsNow, yearNow, increaseRate, budget) {
+	      return_arr = []
+	      currentEmissions = emissionsNow
+	      var i = -1
+	      for (i = yearNow + 1; i < actYear; i++) {
+		  currentEmissions += increaseRate*currentEmissions
+		  year = {"Year": i, "Total": currentEmissions}
+		  return_arr.push(year)
+		  budget -= currentEmissions
+		  if (budget < 0) {
+		      console.log("Outa budget, sucks to suck")
+		      return -1
+		  }
+	      }
+	      var e = 2.71828
+	      decreaseRate = 1 - Math.pow(e,-currentEmissions/budget)
+	      console.log("Decrease rate is " + decreaseRate)
+	      for (; i < 2100; i++) {
+		  currentEmissions -= decreaseRate * currentEmissions
+		  
+		  year = {"Year": i, "Total": currentEmissions}
+		  return_arr.push(year)
+		  budget -= currentEmissions
+	      }
+	      console.log("Final budget was: " + budget)
+	      return return_arr
+	  }
+
+	  future_emissions = futureEmissions(2020, 36, 2015, 0.01, 800)
+	  // future_emissions.map(function(d) {console.log(d.Total)})
+
 	  var height = 500
 
 	  var margin = {top: 30, bottom: 30, left: 30, right: 30}
@@ -150,16 +181,33 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 	  console.log("Below")
-	  
+
+	  var ticks = []
+	  for (i = 1960; i <= 2050; i += 5) {
+	      ticks.push(i)
+	  }
 	  d3.csv("/api/emissions_csv", toNum, function(error, data) {
-	      x.domain(data.map(function(d) {return d.Year}))
+	      endYear = data[data.length - 1]
+	      endYearEmissions = endYear.Total
+	      console.log("Last years emissions were " + endYearEmissions)
+	      budget = 800 * 1000 * 12/44 // Convert from Gt CO2 to Mt C
+	      console.log("Budget is " + budget)
+	      futureYears = futureEmissions(2020, endYearEmissions, 2015, 0.02, budget)
+	      data = data.concat(futureYears)
+	      dataYears = data.map(function(d) {return +d.Year})
+	      for (i = 2016; i <= 2050; i++) {
+		  dataYears.push(i)
+	      }
+	      x.domain(dataYears)
 	      y.domain([0, d3.max(data, function(d) { return d.Total; })]);
 
 	      var xAxis = d3.axisBottom(x)
+		  .tickValues(ticks)
 
 	      //chart.attr("height", barHeight * data.length);
 	      var barWidth = width / data.length;
 
+	      /*
 	      var bar = chart.selectAll("g")
 		  .data(data)
 		  .enter().append("g")
@@ -169,12 +217,17 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 		  .attr("y", function(d) {return y(d.Total);})
 		  .attr("height", function(d) {return height - y(d.Total); })
 		  .attr("width", x.bandwidth());
+	      */
 
-	      bar.append("text")
-		  .attr("x", barWidth / 2)
-		  .attr("y", function(d) { return y(d.Total) + 30})
-		  .attr("dy", ".35em")
-		  .text(function(d) { return d.Total; });
+	      var bar2 = chart.selectAll("g")
+		  .data(data)
+		  .enter().append("g")
+		  .attr("transform", function(d, i) {return "translate(" + x(d.Year) + ",0)";})
+
+	      bar2.append("rect")
+		  .attr("y", function(d) {return y(d.Total);})
+		  .attr("height", function(d) {return height - y(d.Total); })
+		  .attr("width", x.bandwidth());
 
 	      chart.append("g")
 		  .attr("class", "x axis")
@@ -183,6 +236,7 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  });
       }
       makeChart()
+      console.log("wat")
       $(window).resize(function() {
 	  console.log("Resize")
 	  makeChart()
