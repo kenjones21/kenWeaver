@@ -121,6 +121,19 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  return return_data
       }
 
+      function ticks(start, step, end) {
+	  arr = []
+	  for (i = start; i <= end; i += step) {
+	      arr.push(i)
+	  }
+	  return arr
+      }
+
+      $scope.emissionsData = []
+      $scope.futureData = []
+
+      var emissionsTicks = ticks(1960, 5, 2050)
+
       function makeChart() {
 
 	  function futureEmissions(actYear, emissionsNow, yearNow, increaseRate, budget) {
@@ -140,7 +153,7 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      var e = 2.71828
 	      decreaseRate = 1 - Math.pow(e,-currentEmissions/budget)
 	      console.log("Decrease rate is " + decreaseRate)
-	      for (; i < 2100; i++) {
+	      for (; i <= 2050; i++) {
 		  currentEmissions -= decreaseRate * currentEmissions
 		  
 		  year = {"Year": i, "Total": currentEmissions}
@@ -156,7 +169,9 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 
 	  var height = 500
 
-	  var margin = {top: 30, bottom: 30, left: 30, right: 30}
+	  var margin = {top: 30, bottom: 30, left: 50, right: 30}
+
+	  d3.selectAll(".chart > *").remove()
 
 	  width = d3.select("#post-20170722").style("width")
 	  width = +(width.substr(0, width.length-2))
@@ -165,14 +180,11 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 
 	  var x = d3.scaleBand()
 	      .range([0, width])
-	      .padding(0.1)
+	      .padding(0.05)
 	      .round(true)
 
 	  var y = d3.scaleLinear()
 	      .range([height, 0]);
-
-	  console.log(width)
-	  console.log(typeof width)
 
 	  var chart = d3.select(".chart")
 	      .attr("width", width + margin.left + margin.right)
@@ -182,17 +194,15 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 
 	  console.log("Below")
 
-	  var ticks = []
-	  for (i = 1960; i <= 2050; i += 5) {
-	      ticks.push(i)
-	  }
 	  d3.csv("/api/emissions_csv", toNum, function(error, data) {
+	      $scope.emissionsData = data
 	      endYear = data[data.length - 1]
 	      endYearEmissions = endYear.Total
 	      console.log("Last years emissions were " + endYearEmissions)
 	      budget = 800 * 1000 * 12/44 // Convert from Gt CO2 to Mt C
 	      console.log("Budget is " + budget)
 	      futureYears = futureEmissions(2020, endYearEmissions, 2015, 0.02, budget)
+	      $scope.futureData = futureYears
 	      data = data.concat(futureYears)
 	      dataYears = data.map(function(d) {return +d.Year})
 	      for (i = 2016; i <= 2050; i++) {
@@ -202,7 +212,9 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      y.domain([0, d3.max(data, function(d) { return d.Total; })]);
 
 	      var xAxis = d3.axisBottom(x)
-		  .tickValues(ticks)
+		  .tickValues(emissionsTicks)
+
+	      var yAxis = d3.axisLeft(y)
 
 	      //chart.attr("height", barHeight * data.length);
 	      var barWidth = width / data.length;
@@ -223,23 +235,78 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 		  .data(data)
 		  .enter().append("g")
 		  .attr("transform", function(d, i) {return "translate(" + x(d.Year) + ",0)";})
+		  .attr("class", "barg")
 
 	      bar2.append("rect")
+		  .attr("class", "bar")
 		  .attr("y", function(d) {return y(d.Total);})
 		  .attr("height", function(d) {return height - y(d.Total); })
 		  .attr("width", x.bandwidth());
 
 	      chart.append("g")
-		  .attr("class", "x axis")
+		  .attr("class", "x_axis axis")
 		  .attr("transform", "translate(0," + height + ")")
 		  .call(xAxis);
+
+	      chart.append("g")
+		  .attr("class", "y_axis axis")
+		  .call(yAxis)
 	  });
       }
+
+      function resizeChart() {
+	  // Update width and height
+	  var height = 500
+
+	  var margin = {top: 30, bottom: 30, left: 50, right: 30}
+
+	  width = d3.select("#post-20170722").style("width")
+	  width = +(width.substr(0, width.length-2))
+	  width = width - margin.left - margin.right
+	  height = height - margin.top - margin.bottom
+
+	  var x = d3.scaleBand()
+	      .range([0, width])
+	      .padding(0.05)
+	      .round(true)
+
+	  var y = d3.scaleLinear()
+	      .range([height, 0]);
+
+	  var allYears = $scope.emissionsData.concat($scope.futureData)
+	  dataYears = allYears.map(function(d) {return +d.Year})
+
+	  x.domain(dataYears)
+	  y.domain([0, d3.max(allYears, function(d) { return d.Total; })]);
+
+	  var xAxis = d3.axisBottom(x)
+	      .tickValues(emissionsTicks)
+	  
+	  var yAxis = d3.axisLeft(y)
+
+	  var chart = d3.select(".chart")
+	      .attr("width", width + margin.left + margin.right)
+	      .attr("height", height + margin.top + margin.bottom)
+
+	  chart.selectAll(".barg")
+	      .attr("transform", function(d, i) {return "translate(" + x(d.Year) + ",0)";})
+	  
+	  chart.selectAll(".bar")
+	      .attr("y", function(d) {return y(d.Total);})
+	      .attr("height", function(d) {return height - y(d.Total); })
+	      .attr("width", x.bandwidth());
+
+	  chart.select(".x_axis")
+	      .attr("transform", "translate(0," + height + ")")
+	      .call(xAxis)
+
+	  chart.select(".y_axis")
+	      .call(yAxis)
+      }
       makeChart()
-      console.log("wat")
       $(window).resize(function() {
 	  console.log("Resize")
-	  makeChart()
+	  resizeChart()
       });
   }]);
 
