@@ -153,7 +153,7 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      return_arr.push(year)
 	      budget -= currentEmissions
 	  }
-	  console.log("Final budget was: " + budget)
+	  // console.log("Final budget was: " + budget)
 	  return return_arr
       }
 
@@ -215,7 +215,11 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      .attr("class", "barg")
 
 	  bar2.append("rect")
-	      .attr("class", "bar")
+	      .attr("class", function(d) {
+		  if (d.Year <= $scope.endYear.Year) return "bar past"
+		  else if (d.Year < $scope.delayDate) return "bar delay"
+		  else return "bar future"
+	      })
 	      .attr("y", function(d) {return y(d.Total);})
 	      .attr("height", function(d) {return height - y(d.Total); })
 	      .attr("width", x.bandwidth());
