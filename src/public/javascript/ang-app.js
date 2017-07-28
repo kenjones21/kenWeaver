@@ -83,7 +83,6 @@ app.controller('HomeController', ['$scope', '$location', '$http',
 
 app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll',
   function($scope, $location, $http, $anchorScroll) {
-      console.log("Running this bullshit")
       $scope.showDict = {}
       $anchorScroll()
       $scope.toBottom = function() {
@@ -129,41 +128,43 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  return arr
       }
 
+      function futureEmissions(actYear, emissionsNow, yearNow, increaseRate, budget) {
+	  return_arr = []
+	  currentEmissions = emissionsNow
+	  var i = -1
+	  for (i = yearNow + 1; i < actYear; i++) {
+	      currentEmissions += increaseRate*currentEmissions
+	      year = {"Year": i, "Total": currentEmissions}
+	      return_arr.push(year)
+	      budget -= currentEmissions
+	      if (budget < 0) {
+		  console.log("Outa budget, sucks to suck")
+		  return -1
+	      }
+	  }
+	  var e = 2.71828
+	  decreaseRate = 1 - Math.pow(e,-currentEmissions/budget)
+	  console.log("Decrease rate is " + decreaseRate)
+	  for (; i <= 2050; i++) {
+	      currentEmissions -= decreaseRate * currentEmissions
+	      
+	      year = {"Year": i, "Total": currentEmissions}
+	      return_arr.push(year)
+	      budget -= currentEmissions
+	  }
+	  console.log("Final budget was: " + budget)
+	  return return_arr
+      }
+
       $scope.emissionsData = []
       $scope.futureData = []
+      $scope.delayDate = 2016
+      $scope.budget = 800 * 1000 * 12/44 // Convert from Gt CO2 to Mt C
+      $scope.endYear = {Total: -1}
 
       var emissionsTicks = ticks(1960, 5, 2050)
 
       function makeChart() {
-
-	  function futureEmissions(actYear, emissionsNow, yearNow, increaseRate, budget) {
-	      return_arr = []
-	      currentEmissions = emissionsNow
-	      var i = -1
-	      for (i = yearNow + 1; i < actYear; i++) {
-		  currentEmissions += increaseRate*currentEmissions
-		  year = {"Year": i, "Total": currentEmissions}
-		  return_arr.push(year)
-		  budget -= currentEmissions
-		  if (budget < 0) {
-		      console.log("Outa budget, sucks to suck")
-		      return -1
-		  }
-	      }
-	      var e = 2.71828
-	      decreaseRate = 1 - Math.pow(e,-currentEmissions/budget)
-	      console.log("Decrease rate is " + decreaseRate)
-	      for (; i <= 2050; i++) {
-		  currentEmissions -= decreaseRate * currentEmissions
-		  
-		  year = {"Year": i, "Total": currentEmissions}
-		  return_arr.push(year)
-		  budget -= currentEmissions
-	      }
-	      console.log("Final budget was: " + budget)
-	      return return_arr
-	  }
-
 	  future_emissions = futureEmissions(2020, 36, 2015, 0.01, 800)
 	  // future_emissions.map(function(d) {console.log(d.Total)})
 
@@ -196,12 +197,11 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 
 	  d3.csv("/api/emissions_csv", toNum, function(error, data) {
 	      $scope.emissionsData = data
-	      endYear = data[data.length - 1]
-	      endYearEmissions = endYear.Total
+	      $scope.endYear = data[data.length - 1]
+	      endYearEmissions = $scope.endYear.Total
 	      console.log("Last years emissions were " + endYearEmissions)
-	      budget = 800 * 1000 * 12/44 // Convert from Gt CO2 to Mt C
-	      console.log("Budget is " + budget)
-	      futureYears = futureEmissions(2020, endYearEmissions, 2015, 0.02, budget)
+	      console.log("Budget is " + $scope.budget)
+	      futureYears = futureEmissions(2020, endYearEmissions, 2015, 0.02, $scope.budget)
 	      $scope.futureData = futureYears
 	      data = data.concat(futureYears)
 	      dataYears = data.map(function(d) {return +d.Year})
@@ -218,18 +218,6 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 
 	      //chart.attr("height", barHeight * data.length);
 	      var barWidth = width / data.length;
-
-	      /*
-	      var bar = chart.selectAll("g")
-		  .data(data)
-		  .enter().append("g")
-		  .attr("transform", function(d, i) { return "translate(" + x(d.Year) + ",0)"; });
-
-	      bar.append("rect")
-		  .attr("y", function(d) {return y(d.Total);})
-		  .attr("height", function(d) {return height - y(d.Total); })
-		  .attr("width", x.bandwidth());
-	      */
 
 	      var bar2 = chart.selectAll("g")
 		  .data(data)
@@ -251,6 +239,17 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      chart.append("g")
 		  .attr("class", "y_axis axis")
 		  .call(yAxis)
+
+	      var delayInput = d3.select("#delayRange")
+		  .attr("id", "delayYear")
+		  .attr("type", "range")
+		  .attr("min", 2016)
+		  .attr("max", 2035)
+		  .attr("ng-model", "delayDate")
+		  .style("width", x(2035) - x(2016) + "px")
+		  .style("position", "relative")
+		  .style("left", x(2016) + margin.left + "px")
+	      
 	  });
       }
 
@@ -302,6 +301,15 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 
 	  chart.select(".y_axis")
 	      .call(yAxis)
+      }
+
+      $scope.updateFuture = function() {
+	  $scope.futureData = futureEmissions($scope.delayDate, $scope.endYear.Total,
+					      $scope.endYear.Year, 0, $scope.budget)
+	  data = $scope.emissionsData.concat($scope.futureData)
+	  d3.selectAll(".bar")
+	      .data(data)
+	  resizeChart()
       }
       makeChart()
       $(window).resize(function() {

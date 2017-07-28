@@ -49,7 +49,11 @@
     </p>
 
     <div class="chart_wrapper">
-      <svg class="chart"></svg>
+      <input type="range" ng-model="delayDate" id="delayRange" ng-change="updateFuture()">
+      <svg class="chart">
     </div>
+    <p>
+      {{endYear.Total}}
+    </p>
   </div>
 </div>
