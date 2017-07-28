@@ -205,6 +205,7 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      .tickValues(emissionsTicks)
 
 	  var yAxis = d3.axisLeft(y)
+	      .tickPadding(15)
 
 	  //chart.attr("height", barHeight * data.length);
 
@@ -234,14 +235,13 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      .call(yAxis)
 
 	  var delayInput = d3.select("#delayRange")
-	      .attr("id", "delayYear")
 	      .attr("type", "range")
-	      .attr("min", 2016)
+	      .attr("min", $scope.endYear.Year + 1)
 	      .attr("max", 2035)
 	      .attr("ng-model", "delayDate")
-	      .style("width", x(2035) - x(2016) + "px")
+	      .style("width", x(2035) - x($scope.endYear.Year + 1) + "px")
 	      .style("position", "relative")
-	      .style("left", x(2016) + margin.left + "px")	      
+	      .style("left", x($scope.endYear.Year + 1) + margin.left + "px")	      
       }
 
       function getData() {
