@@ -262,9 +262,19 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      .attr("min", $scope.endYear.Year + 1)
 	      .attr("max", 2035)
 	      .attr("ng-model", "delayDate")
-	      .style("width", x(2035) - x($scope.endYear.Year + 1) + "px")
-	      .style("position", "relative")
-	      .style("left", x($scope.endYear.Year + 1) + margin.left + "px")
+	  console.log("Width before delayInput check is " + width)
+	  if (width > widthTickLimit) {
+	      delayInput.style("width", x(2035) - x($scope.endYear.Year + 1) + "px")
+		  .style("position", "relative")
+		  .style("left", x($scope.endYear.Year + 1) + margin.left + "px")
+	  }
+	  else {
+	      console.log("width is small")
+	      
+	      delayInput.style("width", null)
+		  .style("left", null)
+	  }
+	      
 
 	  chart.append("text")
 	      .attr("x", width/4)
