@@ -166,6 +166,7 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
       var y = function() {console.log("y not set yet")}
       var height = -1
       var width = -1
+      var widthTickLimit = 500 // Smaller than this, and we remove x axis ticks
 
       var emissionsTicks = ticks(1960, 5, 2050)
 
@@ -208,7 +209,12 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  y.domain([0, d3.max(data, function(d) { return d.Total; })]);
 
 	  var xAxis = d3.axisBottom(x)
-	      .tickValues(emissionsTicks)
+	  if (width > widthTickLimit) {
+	      xAxis.tickValues(emissionsTicks)
+	  }
+	  else {
+	      xAxis.tickValues([])
+	  }
 
 	  var yAxis = d3.axisLeft(y)
 	      .tickPadding(15)
