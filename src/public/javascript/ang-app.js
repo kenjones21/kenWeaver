@@ -265,6 +265,7 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      .attr("y", height/4)
 	      .text("Delayed until: " + $scope.delayDate)
 	      .attr("class", "delayDateText")
+	      .style("font-size", x.bandwidth() * 3 + "px")
       }
 
       function getData() {
@@ -289,6 +290,7 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      .attr("height", function(d) {return height - y(d.Total); })
 	  d3.select(".delayDateText")
 	      .text("Delayed until: " + $scope.delayDate)
+	      .style("font-size", x.bandwidth() * 3 + "px")
 	  //makeChart()
       }
       getData()
