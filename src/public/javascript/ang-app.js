@@ -270,7 +270,7 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  }
 	  else {
 	      delayInput.style("width", x(2050) - x(1960) + "px")
-		  .style("postion", "relative")
+		  .style("position", "relative")
 		  .style("left", x(1960) + margin.left + "px")
 	  }
 	      
