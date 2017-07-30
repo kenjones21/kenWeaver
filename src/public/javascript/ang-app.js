@@ -269,10 +269,9 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 		  .style("left", x($scope.endYear.Year + 1) + margin.left + "px")
 	  }
 	  else {
-	      console.log("width is small")
-	      
-	      delayInput.style("width", null)
-		  .style("left", null)
+	      delayInput.style("width", x(2050) - x(1960) + "px")
+		  .style("postion", "relative")
+		  .style("left", x(1960) + margin.left + "px")
 	  }
 	      
 
