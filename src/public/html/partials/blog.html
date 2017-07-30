@@ -4,56 +4,47 @@
   <h1 class="blogHeader">Ken's Blog</h1>
   <h3 class="blogUnderHeader">Philadelphia's Climate Politics</h3>
   <button class="btn blogbutton" id="20170722"
-	  type="button" ng-click="toggle('20170722')">Where We're At</button>
+	  type="button" ng-click="toggle('20170722')">Carbon Budget and 2 Degrees Celsius</button>
   <div class="blogPost" id="post-20170722" ng-show="showDict['post-20170722']">
+
+
     <p>
-      Many of you will know that a recently made a rather abrupt career decision
-      to leave graduate school. Part of this decision was a personal choice - I
-      have struggled somewhat to focus on my research - but part of the decision
-      was motivated by outside forces. Namely, over the past 8 months or so, I've
-      been in a state of sort of sustained panic about climate change. I believe
-      I can trace this feeling back to being introduced to a presentation by Kevin
-      Anderson on carbon budgets, as absurd as that
-      sounds. I've embedded the video below, but it's quite long so I'll try to
-      walk through the logic in this post instead.
+      The headline goal of the Paris agreement is as follows:
     </p>
+    
+    <blockquote>
+      Holding the increase in the global average temperature to well below 2 °C above
+      pre-industrial levels and to pursue  efforts  to limit the  temperature  increase
+      to 1.5 °C above  pre-industrial levels,  recognizing that this would significantly
+      reduce the risks and impacts of climate change;
+    </blockquote>
 
     <p>
-      I suspect many people who have politics that are similar to mine probably
-      have had climate change rattling around in their head for quite some time.
-      It's difficult to really understand how serious it is - or how pressing -
-      without understanding carbon budgets, and how they constrain the choices
-      we make every day.
-    </p>
-
-    <p>
-      The last IPCC Report, finalized in 2014, reported a carbon budget for
-      various temperature thresholds (1.5, 2, and 3 degrees Celsius). For these
-      temperature targets, it details the amount of carbon dioxide the world can
-      emit to have a certain chance at staying under that threshold. The
-      international community has decided that 2 degrees Celsius is an appropriate
-      threshold that delineates dangerous climate change from not so dangerous
-      (acceptable?) climate change. There was a push by some countries to get a
-      1.5 degree target included during the latests negotiations in Paris, as for
-      some places 2 degrees Celsius may well represent a death sentence, but for
-      now we'll focus on the carbon budgets for two degrees.
-    </p>
-
-    <img src="/images/AR5_CarbonBudget.png", class="img-responsive center-block"
-	 title="Carbon budgets for various temperature thresholds and probabilities">
-
-    <p>
-      For 2 degrees Celsius, the IPCC gives a budget of 1000 Gigatons of CO2 from
-      2011 on. Since we have a budget, we can work out how fast the world would
-      need to decarbonize given delayed action to a certain date. 
+      Roughly speaking, the temperature
+      that the earth reaches is contingent on cumulative emissions of carbon
+      dioxide, with some leeway for other greenhouse gases given. This allows us to determine
+      a budget we must live within if we want to stay below 2 degrees Celsius with a given
+      probability. The above agreement says "well below 2 °C", but if we're charitable and
+      read that "well below" as "a 66% chance of staying below" then the chart beneath
+      demonstrates how fast our emissions must fall given action delayed to a certain date,
+      assuming (again, charitably) an exponential rate of decarbonization.
     </p>
 
     <div class="chart_wrapper">
       <input type="range" ng-model="delayDate" id="delayRange" ng-change="updateFuture()">
       <svg class="chart">
     </div>
+
     <p>
-      {{endYear.Total}}
+      The longer we wait, the faster we have to go, if we're serious about 2 degrees.
+      This, then, is the lens through which our policies should be measured. Policies that
+      merely hold our emissions constant, or those that give emissions reduction rates of
+      1 or 2 percent a year, are stunningly inadequate to the challenge at hand. When a
+      politician (like our Mayor) symbolically signs on to the Paris agreement, then it
+      ought to be contingent on them to demonstrate how they will get emissions to fall
+      fast enough to be consistent with 2 °C. Symbolic gestures will mean little to
+      the lives of young and vulnerable people around the planet. 
     </p>
+
   </div>
 </div>

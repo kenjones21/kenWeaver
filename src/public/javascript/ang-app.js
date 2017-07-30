@@ -160,8 +160,12 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
       $scope.budget = 800 * 1000 * 12/44 // Convert from Gt CO2 to Mt C
       $scope.emissionsData = []
       $scope.futureData = []
-      $scope.delayDate = 2016
+      $scope.delayDate = 2017
       $scope.endYear = {Total: -1}
+      var x = function() {console.log("x not set yet")}
+      var y = function() {console.log("y not set yet")}
+      var height = -1
+      var width = -1
 
       var emissionsTicks = ticks(1960, 5, 2050)
 
@@ -169,24 +173,26 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  // Makes chart, assuming data is read in
 	  // future_emissions = futureEmissions(2020, 36, 2015, 0.01, 800)
 	  // future_emissions.map(function(d) {console.log(d.Total)})
-
-	  var height = 500 // Should be related to width?
-
+	  var ratio = 2.0
 	  var margin = {top: 30, bottom: 30, left: 50, right: 30}
 
 	  d3.selectAll(".chart > *").remove()
 
 	  width = d3.select("#post-20170722").style("width")
 	  width = +(width.substr(0, width.length-2))
+	  height = width/ratio // Should be related to width?
 	  width = width - margin.left - margin.right
 	  height = height - margin.top - margin.bottom
 
-	  var x = d3.scaleBand()
+	  console.log("Width is " + width)
+	  console.log("Height is " + height)
+
+	  x = d3.scaleBand()
 	      .range([0, width])
 	      .padding(0.05)
 	      .round(true)
 
-	  var y = d3.scaleLinear()
+	  y = d3.scaleLinear()
 	      .range([height, 0]);
 
 	  var chart = d3.select(".chart")
@@ -228,11 +234,22 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  chart.append("g")
 	      .attr("class", "x_axis axis")
 	      .attr("transform", "translate(0," + height + ")")
-	      .call(xAxis);
+	      .call(xAxis)
+	      .append("text")
+	      .attr("x", width/2)
+	      .attr("y", margin.bottom + "px")
+	      .style("text-anchor", "end")
+	      .text("Year")
 
 	  chart.append("g")
 	      .attr("class", "y_axis axis")
 	      .call(yAxis)
+	      .append("text")
+	      .attr("transform", "rotate(-90)")
+	      .attr("y", 6)
+	      .attr("dy", ".71em")
+	      .style("text-anchor", "end")
+	      .text("MtC/yr")
 
 	  var delayInput = d3.select("#delayRange")
 	      .attr("type", "range")
@@ -241,7 +258,13 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	      .attr("ng-model", "delayDate")
 	      .style("width", x(2035) - x($scope.endYear.Year + 1) + "px")
 	      .style("position", "relative")
-	      .style("left", x($scope.endYear.Year + 1) + margin.left + "px")	      
+	      .style("left", x($scope.endYear.Year + 1) + margin.left + "px")
+
+	  chart.append("text")
+	      .attr("x", width/4)
+	      .attr("y", height/4)
+	      .text("Delayed until: " + $scope.delayDate)
+	      .attr("class", "delayDateText")
       }
 
       function getData() {
@@ -260,9 +283,13 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  $scope.futureData = futureEmissions($scope.delayDate, $scope.endYear.Total,
 					      $scope.endYear.Year, 0, $scope.budget)
 	  data = $scope.emissionsData.concat($scope.futureData)
-	  d3.selectAll(".bar")
-	      .data(data)
-	  makeChart()
+	  var barg = d3.selectAll(".barg").data(data) // Update data?
+	      .select("rect")
+	      .attr("y", function(d) {return y(d.Total);})
+	      .attr("height", function(d) {return height - y(d.Total); })
+	  d3.select(".delayDateText")
+	      .text("Delayed until: " + $scope.delayDate)
+	  //makeChart()
       }
       getData()
       $(window).resize(function() {
