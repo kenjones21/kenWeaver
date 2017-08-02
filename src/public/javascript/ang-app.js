@@ -1,41 +1,44 @@
-var app = angular.module('MEAN-Template-Angular', ['ngRoute']);
+var app = angular.module('MEAN-Template-Angular', ['ui.router']);
 
 // Configure routes for this application
-app.config(['$routeProvider', '$locationProvider',
-  function($routeProvider, $locationProvider) {
-    $routeProvider.when('/', {
-      templateUrl: '/html/partials/home.html',
-      controller: 'HomeController'
-    }).when('/profile', {
-      templateUrl: '/html/partials/profile.html',
-      controller:'ProfileController'
-    }).when('/chem/genChem', {
-      templateUrl: '/html/partials/chem/genChem.html',
-      controller:'ChemController'
-    }).when('/mail', {
-      templateUrl: '/html/partials/mail.html',
-      controller:'MailController'
-    }).when('/movie', {
-      templateUrl: '/html/partials/movie.html',
-      controller:'MovieController'
-    }).when('/minecraft',{
-	templateUrl: '/html/partials/minecraft.html',
-	controller: 'MinecraftController'
-    }).when('/bills',{
+app.config(function($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.otherwise('/home');
+    $stateProvider.state('home', {
+	url:'/home',
+	templateUrl: "/html/partials/home.html",
+	controller: 'HomeController'
+    }).state('mail', {
+	url: "/mail",
+	templateUrl: '/html/partials/mail.html',
+	controller:'MailController'
+    }).state('movie', {
+	url: "/movie",
+	templateUrl: '/html/partials/movie.html',
+	controller:'MovieController'
+    }).state('bills',{
+	url: "/bills",
 	templateUrl: '/html/partials/bills.html',
 	controller: 'BillsController'
-    }).when('/blog', {
-	templateUrl: '/html/partials/blog.html',
-	controller: 'BlogController'
-    }).otherwise({
-      redirectTo: '/'
-    });
-}]);
+    }).state('blog', {
+	url: "/blog",
+	templateUrl: "/html/partials/blog.html",
+	controller: "BlogController"
+    }).state("blogid", {
+	url: "/blog/:blogid",
+	templateUrl: function(urlattr) {
+	    console.log(urlattr)
+	    return '/html/partials/blog' + urlattr.blogid + '.html'
+	},
+	controllerProvider: function($stateParams) {
+	    return "Blog" + $stateParams.blogid + "Controller"
+	}
+    })
+});
 
 // This controll controls the home page!!!
 app.controller('HomeController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
-
+      console.log("Home controller ya'll")
     var host = $location.$$host;
     var port = $location.$$port;
     console.log(port);
@@ -79,32 +82,20 @@ app.controller('HomeController', ['$scope', '$location', '$http',
       }
     });
   }
-]);
+				 ]);
 
 app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll',
   function($scope, $location, $http, $anchorScroll) {
-      $scope.showDict = {}
-      $anchorScroll()
-      $scope.toBottom = function() {
-	  $location.hash('bottom')
+      console.log("Loaded BlogController")
+      $scope.goTo = function(blogID) {
+	  console.log("in go to")
+	  $location.url($location.url() + "/" + blogID)
       }
-      $scope.toggle = function(id) {
-	  console.log("Function call")
-	  $location.hash(id)
-	  postString = "post-" + id
-	  if ($scope.showDict[postString]) {
-	      $scope.showDict[postString] = false
-	  }
-	  else {
-	      $scope.showDict[postString] = true
-	  }
-	  console.log($scope.showDict[postString])
-      }
-      // Toggle the hash if we have it. Done on load or whenever hash changes
-      if ($location.hash() !== "") {
-	  console.log("We have a hash")
-	  $scope.toggle($location.hash())
-      }
+  }]);
+
+app.controller('Blog20170722Controller', ['$scope', '$location', '$http', '$anchorScroll',
+  function($scope, $location, $http, $anchorScroll) {
+      console.log("Blog20170722Controller")
       function toNum(d) {
 	  // Assume all values can be converted
 	  for (var key in d) {
