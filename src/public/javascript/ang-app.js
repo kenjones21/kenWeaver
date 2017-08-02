@@ -92,12 +92,14 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 	  $location.url($location.url() + "/" + blogID)
       }
       function removeHash() {
+	  // Returns url string (no base) without hash
 	  hash = $location.hash()
 	  hashSize = hash.length
 	  urlWithoutHash = $location.url().substring(0, $location.url().length - hashSize - 1)
 	  return urlWithoutHash
       }
       if ($location.hash() !== "") {
+	  // Redirect from old style of links
 	  baseUrl = removeHash()
 	  $location.url(baseUrl + "/" + $location.hash())
       }
