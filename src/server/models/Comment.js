@@ -6,7 +6,8 @@ var commentSchema = new Schema({
   name: String,
   text: String,
   date: {type: Date, default: Date.now},
-  replyTo: ObjectId,
+  parent: ObjectId,
+  children: [ObjectId]
   blogPostId: String
 });
 
