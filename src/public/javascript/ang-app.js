@@ -87,9 +87,19 @@ app.controller('HomeController', ['$scope', '$location', '$http',
 app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll',
   function($scope, $location, $http, $anchorScroll) {
       console.log("Loaded BlogController")
+      console.log($location.url())
       $scope.goTo = function(blogID) {
-	  console.log("in go to")
 	  $location.url($location.url() + "/" + blogID)
+      }
+      function removeHash() {
+	  hash = $location.hash()
+	  hashSize = hash.length
+	  urlWithoutHash = $location.url().substring(0, $location.url().length - hashSize - 1)
+	  return urlWithoutHash
+      }
+      if ($location.hash() !== "") {
+	  baseUrl = removeHash()
+	  $location.url(baseUrl + "/" + $location.hash())
       }
   }]);
 
