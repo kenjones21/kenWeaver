@@ -13,6 +13,7 @@ var transporter = nodemailer.createTransport();
 var User = require('../models/User');
 var Mail = require('../models/Mail.js');
 var Bill = require('../models/Bill.js');
+var Comment = require('../models/Comment.js');
 
 // GET /api/user return all users
 router.get('/users', function(req, res, next) {
@@ -109,7 +110,7 @@ router.post('/billout', function(req, res, next) {
   console.log("Bill Out Request")
   Bill.create(req.body, function(err, post) {
     if (err) return next(err);
-      res.json(post);
+    res.json(post);
   }); 
 });
 
@@ -125,6 +126,22 @@ router.get('/emissions_csv', function(req, res, next) {
     console.log("Emissions csv request")
     res.sendFile("./Carbon_Budget.csv", {root: "."})
     console.log("Sent file")
+});
+
+router.get('/comments/:blogPostId', function(req, res, next) {
+  Comment.find({blogPostId: req.params.blogPostId}, function(err, comments) {
+    if (err) return next(err);
+    console.log("Comments: ")
+    console.log(comments)
+    res.json(comments)
+  });
+});
+
+router.post('/comment', function(req, res, next) {
+  Comment.create(req.body, function(err, post) {
+    if (err) return next(err);
+    res.json(post)
+  });
 });
 
 // Check to see if a user is logged in, if not, redirect them
