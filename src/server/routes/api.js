@@ -138,11 +138,23 @@ router.get('/comments/:blogPostId', function(req, res, next) {
 });
 
 router.post('/comment', function(req, res, next) {
+  console.log("Post a comment")
   Comment.create(req.body, function(err, post) {
     if (err) return next(err);
     res.json(post)
   });
 });
+
+router.post('/modifyComment', function(req, res, next) {
+  console.log("Modify a comment")
+  Comment.findById(req.body._id, function(err, comment) {
+    if (err) return next(err);
+    comment.children = req.body.children
+    comment.save(function(err, updatedComment) {
+      res.json(updatedComment)
+    })
+  })
+})
 
 // Check to see if a user is logged in, if not, redirect them
 function loggedIn(req, res, next) {
