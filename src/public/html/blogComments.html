@@ -1,0 +1,32 @@
+<form id="comment_form" ng-submit="submitComment()">
+  <div class="form-group">
+    <label for="comment_name">Name: </label>
+    <input type="text" class="comment_name" name="name"
+	   ng-model="$parent.name" id="comment_name">
+    <div id="comment_text_button">
+      <textarea class="comment_input" name="comment" ng-model="$parent.comment.text"
+		placeholder="Submit a comment..."></textarea>
+      <button type="submit" class="btn comment_button">Submit</button>
+    </div>
+  </div>
+</form>
+
+<div ng-repeat="(key, value) in baseComments" class="baseComment">
+  <div class="comment_name">{{value.name}}</div>
+  <div class="comment_text">{{value.text}}</div>
+  <div class="comment_children" ng-repeat="(childkey, childval) in value.children">
+      <div class="comment_name">{{findComment(childval).name}}</div>
+      <div class="comment_text">{{findComment(childval).text}}</div>
+  </div>
+  <div class="reply_btn">
+    <a class="reply_btn btn" ng-click="replyForm(value._id)">Reply</a>
+  </div>
+  <div class="reply_form" ng-show="value._id == replyComment.parent">
+    <form id="value._id" class="form-group" ng-submit="submitReply()">
+      <textarea class="comment_input" name="comment" ng-model="$parent.replyComment.text"
+		placeholder="Reply to comment...">
+      </textarea>
+      <button type="submit" class="btn comment_button submit_reply_btn">Reply</button>
+    </form>
+  </div>
+</div>
