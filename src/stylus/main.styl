@@ -130,16 +130,23 @@ h1 {
 .baseComment {
   margin-bottom: 2px
   padding-bottom: 5px
-  border: solid 1px
+  background: none
+}
+
+.comment_children {
+  padding-bottom: 2px
+  border-left: solid grey
+  margin-left: 3%
 }
 
 .comment_name {
   font-size: 10px
+  margin-left: 2%
 }
 
 .comment_text {
   font-size: 14px
-  margin-left: 5%
+  margin-left: 3%
 }
 
 .comment_button {
@@ -148,14 +155,32 @@ h1 {
   margin-top: 2px
 }
 
-.reply_btn {
-  text-align: right
+.comment_button:hover {
+  background-color: grey
 }
 
-.reply {
+.reply_btn {
+  text-align: left
+  font-size: 10px
+}
+
+.reply_btn {
+  font-size: 12px
+  color: black
+}
+
+.reply_btn:hover {
+  color: grey
+}
+
+.submit_reply_btn {
   font-size: 12px
 }
 
 .reply:hover {
   background: grey
+}
+
+.reply_form {
+  margin-left: 3%
 }

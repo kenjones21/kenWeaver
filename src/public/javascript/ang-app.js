@@ -108,7 +108,6 @@ app.controller('BlogController', ['$scope', '$location', '$http', '$anchorScroll
 app.factory("blogComments", ['$http', function($http) {
   return {
     getComments: function(blogPostId) {
-      console.log("getComments")
       return $http({
 	method: 'GET',
 	url: '/api/comments/' + blogPostId
@@ -140,6 +139,14 @@ app.factory("blogComments", ['$http', function($http) {
         data: newComment,
         headers: { 'Content-Type': 'application/json; charset=UTF-8' }
       });
+    },
+    findComment: function(id, comments) {
+      for (i = 0; i < comments.length; i++) {
+	comment = comments[i]
+	if (comment._id == id) {
+	  return comment
+	}
+      }
     }
   }
 }]);
@@ -152,6 +159,17 @@ app.controller('Blog20170722Controller', ['$scope', '$location',
     $scope.blogPostId= blogPostId
     $scope.replyComment = {text: "", name: $scope.name, blogPostId: blogPostId}
     $scope.comment = {text: "", name: $scope.name, blogPostId: blogPostId}
+
+    function validateComment(comment) {
+      if (comment.name === "") {
+	alert("Please enter a name")
+	return
+      }
+      if (comment.text === "") {
+	alert("Please enter a comment")
+	return
+      }
+    }
     
     blogComments.getComments(blogPostId)
       .success(function(comments) {
@@ -160,12 +178,11 @@ app.controller('Blog20170722Controller', ['$scope', '$location',
       })
     
     $scope.submitComment = function() {
-      console.log("Submit the comment!")
       $scope.comment.name = $scope.name
+      validateComment($scope.comment)
       blogComments.postComment($scope.comment)
 	.success(function(response) {
 	  $scope.comment.text = ""
-	  console.log(response)
 	  blogComments.getComments(blogPostId)
 	    .success(function(comments) {
 	      $scope.comments = comments
@@ -180,29 +197,31 @@ app.controller('Blog20170722Controller', ['$scope', '$location',
     
     $scope.submitReply = function() {
       $scope.replyComment.name = $scope.name
-      console.log($scope.replyComment.parent)
+      validateComment($scope.replyComment)
       blogComments.postComment($scope.replyComment)
 	.success(function(response) {
-	  console.log("Reply response: " + response)
 	  $scope.replyComment.text = ""
-	  console.log(response)
 	  replyParent = {}
+	  // Find parent and add child
 	  $scope.baseComments.forEach(function(comment) {
 	    if ($scope.replyComment.parent == comment._id) {
 	      replyParent = comment
-	      replyParent.children.push($scope.replyComment._id)
-	      console.log(replyParent.text)
+	      replyParent.children.push(response._id)
 	    }
 	  })
 	  blogComments.modifyComment(replyParent)
 	    .success(function(modifyResponse) {
-	      console.log(modifyResponse)
 	      blogComments.getComments(blogPostId)
 		.success(function(comments) {
 		  $scope.comments = comments
 		})
 	    })
 	})
+    }
+
+    $scope.findComment = function(id) {
+      return_comment = blogComments.findComment(id, $scope.comments)
+      return return_comment
     }
     function toNum(d) {
       // Assume all values can be converted
