@@ -151,12 +151,11 @@ app.factory("blogComments", ['$http', function($http) {
   }
 }]);
 
-app.controller('Blog20170722Controller', ['$scope', '$location',
+app.controller('BlogPostController', ['$scope', '$location', '$controller',
 					  '$http', '$anchorScroll', 'blogComments',
-  function($scope, $location, $http, $anchorScroll, blogComments) {
-    blogPostId = "20170722"
-    $scope.name = ""
-    $scope.blogPostId= blogPostId
+  function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
+    console.log("BlogPostController init!")
+        $scope.name = ""
     $scope.replyComment = {text: "", name: $scope.name, blogPostId: blogPostId}
     $scope.comment = {text: "", name: $scope.name, blogPostId: blogPostId}
 
@@ -223,6 +222,15 @@ app.controller('Blog20170722Controller', ['$scope', '$location',
       return_comment = blogComments.findComment(id, $scope.comments)
       return return_comment
     }
+
+  }]);
+
+app.controller('Blog20170722Controller', ['$scope', '$location', '$controller',
+					  '$http', '$anchorScroll', 'blogComments',
+  function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
+    blogPostId = "20170722"
+    $scope.blogPostId= blogPostId
+    $controller('BlogPostController', {$scope: $scope});
     function toNum(d) {
       // Assume all values can be converted
       for (var key in d) {
