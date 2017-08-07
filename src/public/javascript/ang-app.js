@@ -441,6 +441,14 @@ app.controller('Blog20170722Controller', ['$scope', '$location', '$controller',
     });
   }]);
 
+app.controller('Blog20170808Controller', ['$scope', '$location', '$controller',
+					  '$http', '$anchorScroll', 'blogComments',
+  function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
+    blogPostId = "20170808"
+    $scope.blogPostId= blogPostId
+    $controller('BlogPostController', {$scope: $scope});
+  }]);
+
 app.controller('ProfileController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
 
