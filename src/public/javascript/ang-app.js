@@ -491,11 +491,11 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       ]
       lastYear = data[data.length-1]
       maxData = d3.max(data, function(d) {return d.Total})
-      future = futureData(lastYear.Year, lastYear.Total, .045, 2050)
+      future = futureData(lastYear.Year, lastYear.Total, 0.045, 2050)
       // Assume maximum is from when emissions are measured because
       // everyone manipulates statistics like that
-      data.push({"Year": 2025, "Total": (1-.26) * maxData})
-      data.push({"Year": 2050, "Total": (1-.80) * maxData})
+      data.push({"Year": 2025, "Total": (1-0.26) * maxData})
+      data.push({"Year": 2050, "Total": (1-0.80) * maxData})
       x.domain([1980, 2050])
       y.domain([0, maxData])
 
