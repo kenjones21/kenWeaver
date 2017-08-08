@@ -272,6 +272,7 @@ app.controller('Blog20170722Controller', ['$scope', '$location', '$controller',
       }
       var e = 2.71828
       decreaseRate = 1 - Math.pow(e,-currentEmissions/budget)
+      console.log("Decrease rate is " + decreaseRate)
       // From integral for exponential decline from now to infinity, consrained by budget
       for (; i <= 2050; i++) {
 	currentEmissions -= decreaseRate * currentEmissions
@@ -441,13 +442,145 @@ app.controller('Blog20170722Controller', ['$scope', '$location', '$controller',
     });
   }]);
 
-app.controller('Blog20170808Controller', ['$scope', '$location', '$controller',
+app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$controller',
 					  '$http', '$anchorScroll', 'blogComments',
-  function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
+  function($scope, $window, $location, $controller, $http, $anchorScroll, blogComments) {
     blogPostId = "20170808"
     $scope.blogPostId= blogPostId
     $controller('BlogPostController', {$scope: $scope});
-  }]);
+    $window.document.title = "Philadelphia's Emissions Targets"
+
+    function futureData(start, startTotal, decreaseRate, end) {
+      arr = []
+      em = startTotal
+      for (year = start; year <= end; year++) {
+	arr.push({"Year": year, "Total": em})
+	em = em * (1-decreaseRate)
+      }
+      return arr
+    }
+
+    function makeChart() {
+      var ratio = 2.0
+      var margin = {top: 30, bottom: 30, left: 50, right: 30}
+
+      width = d3.select("#post-20170808").style("width")
+      width = +(width.substr(0, width.length-2))
+      height = width/ratio 
+      width = width - margin.left - margin.right
+      height = height - margin.top - margin.bottom
+
+      x = d3.scaleLinear()
+	.range([0, width])
+
+      y = d3.scaleLinear()
+	.range([height, 0]);
+
+      var chart = d3.select(".chart")
+	  .attr("width", width + margin.left + margin.right)
+	  .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      // This should be a csv I guess
+      data = [
+	{"Year": 1990, "Total": 21.07},
+	{"Year": 2006, "Total": 22.86},
+	{"Year": 2010, "Total": 21.57},
+	{"Year": 2012, "Total": 20.90}
+      ]
+      lastYear = data[data.length-1]
+      maxData = d3.max(data, function(d) {return d.Total})
+      future = futureData(lastYear.Year, lastYear.Total, .045, 2050)
+      // Assume maximum is from when emissions are measured because
+      // everyone manipulates statistics like that
+      data.push({"Year": 2025, "Total": (1-.26) * maxData})
+      data.push({"Year": 2050, "Total": (1-.80) * maxData})
+      x.domain([1980, 2050])
+      y.domain([0, maxData])
+
+      var xAxis = d3.axisBottom(x),
+	  yAxis = d3.axisLeft(y)
+
+      xAxis.tickFormat(d3.format("d"))
+      
+      
+      /*
+      chart.selectAll(".future_data")
+	.data(future)
+	.enter().append("circle")
+	.attr("class", "future_data")
+	.attr("cy", function(d) {return y(d.Total)})
+	.attr("cx", function(d) {return x(d.Year)})
+	.attr("r", 3)
+	.attr("fill", "red")
+      */
+      // or
+      var line = d3.line()
+	  .x(function(d) { return x(d.Year); })
+	  .y(function(d) { return y(d.Total); })
+      line.curve(d3.curveLinear)
+
+      /*
+      var tip = d3.tip()
+	  .attr('class', 'd3-tip')
+	  .offset([-10, 0])
+	  .html(function(d) {
+	    return "Hi";
+	  })
+      */
+      count = 0
+      
+      chart.append("path")
+	.datum(future)
+	.attr("fill", "none")
+	.attr("stroke", "red")
+	.attr("stroke-linejoin", "round")
+	.attr("stroke-linecap", "round")
+	.attr("stroke-width", 10)
+	.attr("d", line)
+	.on("mouseover", function(d) {
+	  console.log("a")
+	  mouseover = chart.selectAll(".mouseover")
+	    .data([count])
+	  mouseover.enter().append("text")
+	    .attr("class", "mouseover")
+	    .merge(mouseover)
+	    .attr("transform", "translate(" + width/4 + "," + 3 * height / 4 + ")")
+	    .text(function(d) {console.log(d); return d})
+	  count += 1
+	})
+
+      chart.append("g")
+	.attr("class", "x_axis axis")
+	.attr("transform", "translate(0," + height + ")")
+	.call(xAxis)
+
+      chart.append("g")
+	.attr("class", "y_axis axis")
+	.call(yAxis)
+
+      chart.append("path")
+	.datum(data)
+	.attr("fill", "none")
+	.attr("stroke", "steelblue")
+	.attr("stroke-linejoin", "round")
+	.attr("stroke-linecap", "round")
+	.attr("stroke-width", 2)
+	.attr("d", line);
+
+      var bar = chart.selectAll("circle")
+	  .data(data)
+	  .enter().append("circle")
+      	  .attr("class", "circle")
+	  .attr("cy", function(d) {return y(d.Total)})
+	  .attr("cx", function(d) {return x(d.Year)})
+	  .attr("r", 3)
+	  .attr("fill", "steelblue")
+    }
+    makeChart()
+  }])
+      
 
 app.controller('ProfileController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
