@@ -460,6 +460,38 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       return arr
     }
 
+    function interpolate(year, year_0, year_1) {
+      dy = +year_1.Total - +year_0.Total
+      dx = +year_1.Year - +year_0.Year
+      return year_0.Total + (dy/dx * (year - year_0.Year))
+    }
+
+    function scenarioComp(year_0, scenarios, comp_year=null) {
+      // Outputs array of text comparing each scenario for given year. If given
+      // year is not available, provides a linear interpolation between two years
+      arr = []
+      scenarios.forEach(function(scenario) {
+	prev_year = scenario[0]
+	for (i = 0; i < scenario.length; ++i) {
+	  scenario_year = scenario[i]
+	  year_i = scenario_year.Year
+	  if (year_i == year_0) {
+	    arr.push(scenario_year.Total)
+	    break
+	  }
+	  else if (year_i > year_0) {
+	    arr.push(interpolate(year_0, prev_year, scenario_year))
+	    break
+	  }
+	  prev_year = scenario_year
+	}
+      })
+      for (i = 0; i < arr.length; i++) {
+	arr[i] = arr[i]/comp_year.Total
+      }
+      return arr
+    }
+
     function makeChart() {
       var ratio = 2.0
       var margin = {top: 30, bottom: 30, left: 50, right: 30}
@@ -469,6 +501,11 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       height = width/ratio 
       width = width - margin.left - margin.right
       height = height - margin.top - margin.bottom
+
+      var legendTextSize = height * 0.05
+      var colors = ["#1A237E", "#42B3D5", "#DCEDC8"]
+      var legendFormat = d3.format(".2%")
+      console.log(legendFormat(12.3456789))
 
       x = d3.scaleLinear()
 	.range([0, width])
@@ -489,13 +526,18 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	{"Year": 2010, "Total": 21.57},
 	{"Year": 2012, "Total": 20.90}
       ]
-      lastYear = data[data.length-1]
       maxData = d3.max(data, function(d) {return d.Total})
-      future = futureData(lastYear.Year, lastYear.Total, 0.045, 2050)
+      target_2025 = {"Year": 2025, "Total": (1-0.26) * maxData}
+      target_2050 = {"Year": 2050, "Total": (1-0.80) * maxData}
+      data.push(target_2025)
+      data.push(target_2050)
+      var comp_year = 1 // 2006 is the comparison year
+      lastYear = data[data.length-1]
+      em_2017_est = interpolate(2017, data[3], target_2025)
+      future = futureData(2017, em_2017_est, 0.045, 2050)
+      equitable_future = futureData(2017, em_2017_est, 0.06, 2050)
       // Assume maximum is from when emissions are measured because
       // everyone manipulates statistics like that
-      data.push({"Year": 2025, "Total": (1-0.26) * maxData})
-      data.push({"Year": 2050, "Total": (1-0.80) * maxData})
       x.domain([1980, 2050])
       y.domain([0, maxData])
 
@@ -503,7 +545,7 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	  yAxis = d3.axisLeft(y)
 
       xAxis.tickFormat(d3.format("d"))
-      
+      yAxis.tickPadding(15)
       
       /*
       chart.selectAll(".future_data")
@@ -534,10 +576,11 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       chart.append("path")
 	.datum(future)
 	.attr("fill", "none")
-	.attr("stroke", "red")
-	.attr("stroke-linejoin", "round")
-	.attr("stroke-linecap", "round")
-	.attr("stroke-width", 10)
+	.attr("stroke", "#42B3D5")
+	//.attr("stroke-linejoin", "round")
+	//.attr("stroke-linecap", "round")
+	.attr("stroke-width", 2)
+	.style("stroke-dasharray", ("5, 2"))
 	.attr("d", line)
 	.on("mouseover", function(d) {
 	  console.log("a")
@@ -547,9 +590,19 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	    .attr("class", "mouseover")
 	    .merge(mouseover)
 	    .attr("transform", "translate(" + width/4 + "," + 3 * height / 4 + ")")
-	    .text(function(d) {console.log(d); return d})
 	  count += 1
 	})
+
+      chart.append("path")
+	.datum(equitable_future)
+	.attr("fill", "none")
+	.attr("stroke", "#DCEDC8")
+	//.attr("stroke-linejoin", "round")
+	//.attr("stroke-linecap", "round")
+	.attr("stroke-width", 2)
+	.style("stroke-dasharray", ("5, 2"))
+	.attr("d", line)
+
 
       chart.append("g")
 	.attr("class", "x_axis axis")
@@ -559,11 +612,17 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       chart.append("g")
 	.attr("class", "y_axis axis")
 	.call(yAxis)
+	.append("text")
+	.attr("transform", "rotate(-90)")
+	.attr("y", 6)
+	.attr("dy", ".71em")
+	.style("text-anchor", "end")
+	.text("Mt CO2e/yr")
 
       chart.append("path")
 	.datum(data)
 	.attr("fill", "none")
-	.attr("stroke", "steelblue")
+	.attr("stroke", "#1A237E")
 	.attr("stroke-linejoin", "round")
 	.attr("stroke-linecap", "round")
 	.attr("stroke-width", 2)
@@ -576,7 +635,64 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	  .attr("cy", function(d) {return y(d.Total)})
 	  .attr("cx", function(d) {return x(d.Year)})
 	  .attr("r", 3)
-	  .attr("fill", "steelblue")
+	  .attr("fill", "#1A237E")
+
+      line = chart.append("line")
+	.attr("display", "none")
+      
+      chart.append("rect")
+	.attr("class", "overlay")
+	.attr("width", width)
+	.attr("height", height)
+	.attr("fill", "transparent")
+	//.attr("fill", "none")
+	.on("mouseover", function() {
+	  line.style("display", null);
+	})
+	.on("mouseout", function() {
+	  line.style("display", "none");
+	  makeLegend([NaN, NaN, NaN])
+	})
+	.on("mousemove", mousemove);
+
+      function makeLegend(text) {
+	var legend = chart.selectAll(".legend")
+	legend.data(text)
+	  .enter().append("text")
+	  .attr("class", "legend")
+	  .merge(legend)
+	  .attr("transform", function(d, i) {
+	    transx = width/4
+	    transy = height * 3/4 - (i * legendTextSize)
+	    return "translate(" + width/4 + "," + ((height * 3 / 4) + (i * legendTextSize)) + ")"
+	  })
+	  .text(function(d, i) {
+	    if (d) {
+	      return legendFormat(d)
+	    }
+	    else {
+	      return " - "
+	    }
+	  })
+	  .style("font-size", legendTextSize + "px")
+	  .style("fill", function(d, i) {return colors[i]})
+      }
+
+      function mousemove() {
+	var x0 = d3.mouse(this)[0]
+	var year = parseInt(x.invert(x0))
+	scenarios = scenarioComp(year, [data, future, equitable_future], data[comp_year])
+	makeLegend(scenarios)
+	
+	line.attr("display", null)
+	  .style("stroke", "black")  // colour the line
+	  .attr("x1", x0)     // x position of the first end of the line
+	  .attr("y1", 0)      // y position of the first end of the line
+	  .attr("x2", x0)     // x position of the second end of the line
+	  .attr("y2", height);
+
+	
+      }
     }
     makeChart()
   }])
