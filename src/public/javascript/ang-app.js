@@ -466,7 +466,7 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       return year_0.Total + (dy/dx * (year - year_0.Year))
     }
 
-    function scenarioComp(year_0, scenarios, comp_year=null) {
+    function scenarioComp(year_0, scenarios, comp_year) {
       // Outputs array of text comparing each scenario for given year. If given
       // year is not available, provides a linear interpolation between two years
       arr = []
