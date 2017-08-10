@@ -538,7 +538,7 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       equitable_future = futureData(2017, em_2017_est, 0.06, 2050)
       // Assume maximum is from when emissions are measured because
       // everyone manipulates statistics like that
-      x.domain([1980, 2050])
+      x.domain([1987, 2051])
       y.domain([0, maxData])
 
       var xAxis = d3.axisBottom(x),
@@ -651,11 +651,11 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	})
 	.on("mouseout", function() {
 	  line.style("display", "none");
-	  makeLegend([NaN, NaN, NaN])
+	  makeLegend([], [NaN, NaN, NaN])
 	})
 	.on("mousemove", mousemove);
 
-      function makeLegend(text) {
+      function makeLegend(prefix, text) {
 	var legend = chart.selectAll(".legend")
 	legend.data(text)
 	  .enter().append("text")
@@ -668,7 +668,7 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	  })
 	  .text(function(d, i) {
 	    if (d) {
-	      return legendFormat(d)
+	      return prefix[i] + legendFormat(d)
 	    }
 	    else {
 	      return " - "
@@ -681,8 +681,16 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       function mousemove() {
 	var x0 = d3.mouse(this)[0]
 	var year = parseInt(x.invert(x0))
+	x0 = x(year)
+	var prefix = []
+	if (year < 2017 && year >= 1990) {
+	  prefix = ["Estimate: ", "", ""]
+	}
+	else if (year > 2016) {
+	  prefix = ["Target: ", "Minimum 2C: ", "Equitable 2C: "]
+	}
 	scenarios = scenarioComp(year, [data, future, equitable_future], data[comp_year])
-	makeLegend(scenarios)
+	makeLegend(prefix, scenarios)
 	
 	line.attr("display", null)
 	  .style("stroke", "black")  // colour the line
