@@ -502,10 +502,11 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       width = width - margin.left - margin.right
       height = height - margin.top - margin.bottom
 
-      var legendTextSize = height * 0.05
-      var colors = ["#1A237E", "#42B3D5", "#DCEDC8"]
+      var legendTextSize = height * 0.06
+      var colors = ["#1A237E", "#42B3D5", "#BDC9A9"]
       var legendFormat = d3.format(".2%")
-      console.log(legendFormat(12.3456789))
+
+      var pathStrokeWidth = 3
 
       x = d3.scaleLinear()
 	.range([0, width])
@@ -535,7 +536,7 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       lastYear = data[data.length-1]
       em_2017_est = interpolate(2017, data[3], target_2025)
       future = futureData(2017, em_2017_est, 0.045, 2050)
-      equitable_future = futureData(2017, em_2017_est, 0.06, 2050)
+      equitable_future = futureData(2017, em_2017_est, 0.07, 2050)
       // Assume maximum is from when emissions are measured because
       // everyone manipulates statistics like that
       x.domain([1987, 2051])
@@ -579,11 +580,10 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	.attr("stroke", "#42B3D5")
 	//.attr("stroke-linejoin", "round")
 	//.attr("stroke-linecap", "round")
-	.attr("stroke-width", 2)
+	.attr("stroke-width", pathStrokeWidth)
 	.style("stroke-dasharray", ("5, 2"))
 	.attr("d", line)
 	.on("mouseover", function(d) {
-	  console.log("a")
 	  mouseover = chart.selectAll(".mouseover")
 	    .data([count])
 	  mouseover.enter().append("text")
@@ -596,10 +596,10 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       chart.append("path")
 	.datum(equitable_future)
 	.attr("fill", "none")
-	.attr("stroke", "#DCEDC8")
+	.attr("stroke", "#BDC9A9")
 	//.attr("stroke-linejoin", "round")
 	//.attr("stroke-linecap", "round")
-	.attr("stroke-width", 2)
+	.attr("stroke-width", pathStrokeWidth)
 	.style("stroke-dasharray", ("5, 2"))
 	.attr("d", line)
 
@@ -625,7 +625,7 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	.attr("stroke", "#1A237E")
 	.attr("stroke-linejoin", "round")
 	.attr("stroke-linecap", "round")
-	.attr("stroke-width", 2)
+	.attr("stroke-width", pathStrokeWidth)
 	.attr("d", line);
 
       var bar = chart.selectAll("circle")
@@ -649,10 +649,10 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	.on("mouseover", function() {
 	  line.style("display", null);
 	})
-	.on("mouseout", function() {
-	  line.style("display", "none");
-	  makeLegend([], [NaN, NaN, NaN])
-	})
+	//.on("mouseout", function() {
+	//  line.style("display", "none");
+	//  makeLegend([], [NaN, NaN, NaN])
+	//})
 	.on("mousemove", mousemove);
 
       function makeLegend(prefix, text) {
@@ -676,6 +676,7 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	  })
 	  .style("font-size", legendTextSize + "px")
 	  .style("fill", function(d, i) {return colors[i]})
+	  .style("font-weight", "bold")
       }
 
       function mousemove() {
@@ -698,8 +699,6 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	  .attr("y1", 0)      // y position of the first end of the line
 	  .attr("x2", x0)     // x position of the second end of the line
 	  .attr("y2", height);
-
-	
       }
     }
     makeChart()
