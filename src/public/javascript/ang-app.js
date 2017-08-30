@@ -712,12 +712,14 @@ app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
     $controller('BlogPostController', {$scope: $scope});
   }]);
 
-app.controller('Blog20170830Controller', ['$scope', '$location', '$controller',
+app.controller('Blog20170830Controller', ['$scope', '$window', '$location', '$controller',
 					  '$http', '$anchorScroll', 'blogComments',
-  function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
+  function($scope, $window, $location, $controller, $http, $anchorScroll, blogComments) {
     blogPostId = "20170830"
     $scope.blogPostId= blogPostId
     $controller('BlogPostController', {$scope: $scope});
+    $window.document.title = "Harvey and Our Future"
+
   }]);
 
 
