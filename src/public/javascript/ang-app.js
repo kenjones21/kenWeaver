@@ -704,6 +704,22 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
     makeChart()
   }])
       
+app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
+					  '$http', '$anchorScroll', 'blogComments',
+  function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
+    blogPostId = "20170905"
+    $scope.blogPostId= blogPostId
+    $controller('BlogPostController', {$scope: $scope});
+  }]);
+
+app.controller('Blog20170830Controller', ['$scope', '$location', '$controller',
+					  '$http', '$anchorScroll', 'blogComments',
+  function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
+    blogPostId = "20170830"
+    $scope.blogPostId= blogPostId
+    $controller('BlogPostController', {$scope: $scope});
+  }]);
+
 
 app.controller('ProfileController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
