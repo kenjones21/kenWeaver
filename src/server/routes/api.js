@@ -156,6 +156,11 @@ router.post('/modifyComment', function(req, res, next) {
   })
 })
 
+router.get('/maps/:filename', function(req, res, next) {
+  console.log("Get json")
+  res.sendFile("./res/" + req.params.filename, {root: "."})
+})
+
 // Check to see if a user is logged in, if not, redirect them
 function loggedIn(req, res, next) {
   if (req.user) {

@@ -702,14 +702,6 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
       }
     }
     makeChart()
-  }])
-      
-app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
-					  '$http', '$anchorScroll', 'blogComments',
-  function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
-    blogPostId = "20170905"
-    $scope.blogPostId= blogPostId
-    $controller('BlogPostController', {$scope: $scope});
   }]);
 
 app.controller('Blog20170830Controller', ['$scope', '$window', '$location', '$controller',
@@ -719,7 +711,58 @@ app.controller('Blog20170830Controller', ['$scope', '$window', '$location', '$co
     $scope.blogPostId= blogPostId
     $controller('BlogPostController', {$scope: $scope});
     $window.document.title = "Harvey and Our Future"
+  }]);
 
+app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
+					  '$http', '$anchorScroll', 'blogComments',
+  function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
+    blogPostId = "20170905"
+    $scope.blogPostId= blogPostId
+    $controller('BlogPostController', {$scope: $scope});
+
+    var width = 960,
+    height = 1160;
+
+    var svg = d3.select("svg")
+	.attr("width", width)
+	.attr("height", height);
+
+    d3.json("api/maps/philastreets.json", function(err, streets) {
+      if (err) return console.error(err);
+      console.log(streets)
+/*
+      var subunits = topojson.feature(us, uk.objects.subunits);
+      var testing = topojson.feature(uk, uk.objects.places)
+      console.log(testing)
+*/
+      
+      
+      var projection = d3.geoMercator()
+	  .center([-75.233, 39.93])
+	  .scale(15000000)
+	  .translate([width / 2, height / 2]);
+
+      var thing = topojson.feature(streets, streets.objects.streets)
+      console.log(thing)
+      svg.append("path")
+	//.datum(streets)
+	.datum(thing)
+	.attr("d", d3.geoPath().projection(projection))
+	.style("fill", "none")
+	.style("stroke", "blue")
+
+      /*
+      var path = d3.geoPath()
+	  .projection(projection)
+      svg.selectAll(".subunit")
+	.data(subunits.features)
+	.enter().append("path")
+	.attr("class", function(d) {
+	  console.log(d.properties.SU_A3)
+	  return "subunit " + d.properties.SU_A3; })
+	.attr("d", path);
+      */
+    })
   }]);
 
 
