@@ -720,8 +720,10 @@ app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
     $scope.blogPostId= blogPostId
     $controller('BlogPostController', {$scope: $scope});
 
-    var width = 960,
-    height = 1160;
+    width = d3.select("#post-20170905").style("width")
+    width = +width.substring(0, 4)
+    height = width
+    console.log(width, height)
 
     var svg = d3.select("svg")
 	.attr("width", width)
@@ -736,10 +738,9 @@ app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
       console.log(testing)
 */
       
-      
       var projection = d3.geoMercator()
-	  .center([-75.233, 39.93])
-	  .scale(500000)
+	  .center([-75.12, 39.98])
+	  .scale(140000)
 	  .translate([width / 2, height / 2]);
 
       var thing = topojson.feature(streets, streets.objects.streets)
@@ -750,14 +751,6 @@ app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
 	.attr("d", d3.geoPath().projection(projection))
 	.style("fill", "none")
 	.style("stroke", "blue")
-
-      svg.append("circle")
-	.attr("cx", 0)
-	.attr("cy", 0)
-	.attr("r","40")
-	.attr("stroke", "black")
-	.attr("stroke-width","3")
-	.attr("fill", "red")
 
       /*
       var path = d3.geoPath()
