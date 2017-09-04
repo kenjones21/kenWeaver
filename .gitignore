@@ -9,6 +9,7 @@ src/public/html/Test/
 **/d3.min.js
 **/angular-ui-router.min.js
 src/public/images
+res/*
 
 # --------------------
 # Standard files to ignore
