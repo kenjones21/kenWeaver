@@ -722,16 +722,16 @@ app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
 
     width = d3.select("#post-20170905").style("width")
     width = +width.substring(0, 4)
-    height = width
+    height = width * 0.75
     console.log(width, height)
 
     var svg = d3.select("svg")
 	.attr("width", width)
 	.attr("height", height);
 
-    d3.json("api/maps/philastreets.json", function(err, streets) {
+    d3.json("api/maps/philastreets.json", function(err, city) {
       if (err) return console.error(err);
-      console.log(streets)
+      console.log(city)
 /*
       var subunits = topojson.feature(us, uk.objects.subunits);
       var testing = topojson.feature(uk, uk.objects.places)
@@ -740,17 +740,30 @@ app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
       
       var projection = d3.geoMercator()
 	  .center([-75.12, 39.98])
-	  .scale(140000)
+	  .scale(width * 100)
 	  .translate([width / 2, height / 2]);
 
-      var thing = topojson.feature(streets, streets.objects.streets)
-      console.log(thing)
-      svg.append("path")
-	//.datum(streets)
-	.datum(thing)
+      var streets = topojson.feature(city, city.objects.streets).features
+      var bikelanes = topojson.feature(city, city.objects.bikelanes).features
+      console.log(bikelanes)
+      svg.selectAll(".street")
+	.data(streets)
+	.enter().append("path")
+	.attr("class", "street")
+	.attr("d", d3.geoPath().projection(projection))
+	.style("fill", "none")
+	.style("stroke", "#C5C2FF")
+
+      svg.selectAll(".bikelane")
+      	.data(bikelanes)
+	.enter().append("path")
+	.attr("class", "street")
 	.attr("d", d3.geoPath().projection(projection))
 	.style("fill", "none")
 	.style("stroke", "blue")
+    })
+
+    
 
       /*
       var path = d3.geoPath()
@@ -763,7 +776,6 @@ app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
 	  return "subunit " + d.properties.SU_A3; })
 	.attr("d", path);
       */
-    })
   }]);
 
 
