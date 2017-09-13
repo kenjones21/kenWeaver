@@ -720,6 +720,7 @@ app.controller('Blog20170913Controller', ['$scope', '$location', '$controller',
     $scope.blogPostId= blogPostId
     $controller('BlogPostController', {$scope: $scope});
 
+    /*
     width = d3.select("#post-20170913").style("width")
     width = +width.substring(0, width.length - 2)
     height = width * 0.65
@@ -740,11 +741,11 @@ app.controller('Blog20170913Controller', ['$scope', '$location', '$controller',
     d3.json("api/maps/philastreets.json", function(err, city) {
       if (err) return console.error(err);
       console.log(city)
-/*
+
       var subunits = topojson.feature(us, uk.objects.subunits);
       var testing = topojson.feature(uk, uk.objects.places)
       console.log(testing)
-*/
+
 
       streets = topojson.feature(city, city.objects.streets).features
       bikelanes = topojson.feature(city, city.objects.bikelanes).features
@@ -789,7 +790,7 @@ app.controller('Blog20170913Controller', ['$scope', '$location', '$controller',
       updateChart()
     });
 
-      /*
+      
       var path = d3.geoPath()
 	  .projection(projection)
       svg.selectAll(".subunit")
