@@ -719,6 +719,7 @@ app.controller('Blog20170913Controller', ['$scope', '$location', '$controller',
     blogPostId = "20170913"
     $scope.blogPostId= blogPostId
     $controller('BlogPostController', {$scope: $scope});
+    $window.document.title = "Bike Lanes"
 
     /*
     width = d3.select("#post-20170913").style("width")
