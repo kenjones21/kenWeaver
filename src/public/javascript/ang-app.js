@@ -725,6 +725,11 @@ app.controller('Blog20170913Controller', ['$scope', '$location', '$controller',
     height = width * 0.65
     console.log(width, height)
 
+    var projection = d3.geoMercator()
+	.center([-75.12, 39.995])
+	.scale(width * 100)
+	.translate([width / 2, height / 2]);
+
     var svg = d3.select("svg")
 	.attr("width", width)
 	.attr("height", height);
@@ -740,11 +745,6 @@ app.controller('Blog20170913Controller', ['$scope', '$location', '$controller',
       var testing = topojson.feature(uk, uk.objects.places)
       console.log(testing)
 */
-      
-      var projection = d3.geoMercator()
-	  .center([-75.12, 39.995])
-	  .scale(width * 100)
-	  .translate([width / 2, height / 2]);
 
       streets = topojson.feature(city, city.objects.streets).features
       bikelanes = topojson.feature(city, city.objects.bikelanes).features
@@ -768,8 +768,20 @@ app.controller('Blog20170913Controller', ['$scope', '$location', '$controller',
 
     var updateChart = function() {
       width = d3.select("#post-20170913").style("width")
-      width = +width.substring(0, 4)
+      width = +width.substring(0, width.length-2)
       height = width * 0.65
+
+      var svg = d3.select("svg")
+	  .attr("width", width)
+	  .attr("height", height);
+
+      projection = d3.geoMercator()
+	  .center([-75.12, 39.995])
+	  .scale(width * 100)
+	.translate([width / 2, height / 2]);
+
+      svg.selectAll(".street")
+	.attr("d", d3.geoPath().projection(projection))
     }
     
     $(window).resize(function() {
