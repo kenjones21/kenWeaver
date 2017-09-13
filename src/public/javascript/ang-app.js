@@ -722,12 +722,15 @@ app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
 
     width = d3.select("#post-20170905").style("width")
     width = +width.substring(0, 4)
-    height = width * 0.75
+    height = width * 0.65
     console.log(width, height)
 
     var svg = d3.select("svg")
 	.attr("width", width)
 	.attr("height", height);
+
+    var streets;
+    var bikelanes;
 
     d3.json("api/maps/philastreets.json", function(err, city) {
       if (err) return console.error(err);
@@ -739,12 +742,12 @@ app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
 */
       
       var projection = d3.geoMercator()
-	  .center([-75.12, 39.98])
+	  .center([-75.12, 39.995])
 	  .scale(width * 100)
 	  .translate([width / 2, height / 2]);
 
-      var streets = topojson.feature(city, city.objects.streets).features
-      var bikelanes = topojson.feature(city, city.objects.bikelanes).features
+      streets = topojson.feature(city, city.objects.streets).features
+      bikelanes = topojson.feature(city, city.objects.bikelanes).features
       console.log(bikelanes)
       svg.selectAll(".street")
 	.data(streets)
@@ -762,8 +765,11 @@ app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
 	.style("fill", "none")
 	.style("stroke", "blue")
     })
-
     
+    $(window).resize(function() {
+      console.log("Resize")
+      updateChart()
+    });
 
       /*
       var path = d3.geoPath()
