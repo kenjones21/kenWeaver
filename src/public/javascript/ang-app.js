@@ -713,14 +713,14 @@ app.controller('Blog20170830Controller', ['$scope', '$window', '$location', '$co
     $window.document.title = "Harvey and Our Future"
   }]);
 
-app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
+app.controller('Blog20170913Controller', ['$scope', '$location', '$controller',
 					  '$http', '$anchorScroll', 'blogComments',
   function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
-    blogPostId = "20170905"
+    blogPostId = "20170913"
     $scope.blogPostId= blogPostId
     $controller('BlogPostController', {$scope: $scope});
 
-    width = d3.select("#post-20170905").style("width")
+    width = d3.select("#post-20170913").style("width")
     width = +width.substring(0, 4)
     height = width * 0.65
     console.log(width, height)
@@ -765,6 +765,12 @@ app.controller('Blog20170905Controller', ['$scope', '$location', '$controller',
 	.style("fill", "none")
 	.style("stroke", "blue")
     })
+
+    var updateChart = function() {
+      width = d3.select("#post-20170913").style("width")
+      width = +width.substring(0, 4)
+      height = width * 0.65
+    }
     
     $(window).resize(function() {
       console.log("Resize")
