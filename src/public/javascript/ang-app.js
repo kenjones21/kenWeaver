@@ -713,9 +713,9 @@ app.controller('Blog20170830Controller', ['$scope', '$window', '$location', '$co
     $window.document.title = "Harvey and Our Future"
   }]);
 
-app.controller('Blog20170913Controller', ['$scope', '$location', '$controller',
+app.controller('Blog20170913Controller', ['$scope', '$window', '$location', '$controller',
 					  '$http', '$anchorScroll', 'blogComments',
-  function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
+  function($scope, $window, $location, $controller, $http, $anchorScroll, blogComments) {
     blogPostId = "20170913"
     $scope.blogPostId= blogPostId
     $controller('BlogPostController', {$scope: $scope});
