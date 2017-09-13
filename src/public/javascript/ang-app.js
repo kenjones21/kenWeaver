@@ -721,7 +721,7 @@ app.controller('Blog20170913Controller', ['$scope', '$location', '$controller',
     $controller('BlogPostController', {$scope: $scope});
 
     width = d3.select("#post-20170913").style("width")
-    width = +width.substring(0, 4)
+    width = +width.substring(0, width.length - 2)
     height = width * 0.65
     console.log(width, height)
 
