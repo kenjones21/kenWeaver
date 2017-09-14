@@ -14,6 +14,7 @@ var User = require('../models/User');
 var Mail = require('../models/Mail.js');
 var Bill = require('../models/Bill.js');
 var Comment = require('../models/Comment.js');
+var PageView = require('../models/PageView.js');
 
 // GET /api/user return all users
 router.get('/users', function(req, res, next) {
@@ -160,6 +161,21 @@ router.get('/maps/:filename', function(req, res, next) {
   console.log("Get json")
   res.sendFile("./res/" + req.params.filename, {root: "."})
 })
+
+router.post('/blogPageView', function(req, res, next) {
+  console.log("Page View")
+  query = req.body
+  PageView.findOneAndUpdate(query, { $inc: { count: 1 }}, {upsert: true})
+    .exec(function(err, db_res) {
+      console.log(db_res)
+      if (err) { 
+	return next(err) 
+      } 
+      else { 
+	res.json(db_res); 
+      }
+  });
+});
 
 // Check to see if a user is logged in, if not, redirect them
 function loggedIn(req, res, next) {

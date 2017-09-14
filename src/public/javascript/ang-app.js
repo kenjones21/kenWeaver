@@ -155,9 +155,18 @@ app.controller('BlogPostController', ['$scope', '$location', '$controller',
 					  '$http', '$anchorScroll', 'blogComments',
   function($scope, $location, $controller, $http, $anchorScroll, blogComments) {
     console.log("BlogPostController init!")
-        $scope.name = ""
+    $scope.name = ""
     $scope.replyComment = {text: "", name: $scope.name, blogPostId: blogPostId}
     $scope.comment = {text: "", name: $scope.name, blogPostId: blogPostId}
+
+    var loc = {url: $location.url()}
+    var locSuccess = function(response) {
+      console.log(response)
+    }
+    var locFailure = function(response) {
+      console.log(response.data)
+    }
+    $http.post('/api/blogPageView', loc).then(locSuccess, locFailure);
 
     function validateComment(comment) {
       if (comment.name === "") {
