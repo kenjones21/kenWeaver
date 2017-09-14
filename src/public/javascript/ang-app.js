@@ -160,11 +160,10 @@ app.controller('BlogPostController', ['$scope', '$location', '$controller',
     $scope.comment = {text: "", name: $scope.name, blogPostId: blogPostId}
 
     var loc = {url: $location.url()}
-    var locSuccess = function(response) {
-      console.log(response)
-    }
+    var locSuccess = function(response) {}
     var locFailure = function(response) {
-      console.log(response.data)
+      console.log("blogPageView Error")
+      console.log(response)
     }
     $http.post('/api/blogPageView', loc).then(locSuccess, locFailure);
 
