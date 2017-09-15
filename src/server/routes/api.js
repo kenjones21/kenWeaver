@@ -177,6 +177,12 @@ router.post('/blogPageView', function(req, res, next) {
   });
 });
 
+router.get('/blogPageViews', function(req, res, next) {
+  PageView.find({}, function(err, pageViews) {
+    res.json(pageViews)
+  })
+})
+
 // Check to see if a user is logged in, if not, redirect them
 function loggedIn(req, res, next) {
   if (req.user) {
