@@ -826,6 +826,7 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	console.log("Dragged it too low dipshit")
 	return []
       }
+      var peak_year = Math.floor(peakYear.year)
       var x_half = (peakYear.year - lastYear.year) * 0.5
       var delta_em = peakYear.em - lastYear.em
       var edge = 1/2 * x_half * ePrimeLastYear
@@ -849,7 +850,7 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	  }
 	  toPeakYears.push(year_i)
 	}
-	for (; y < peakYear.year; ++y) {
+	for (; y <= peak_year; ++y) {
 	  year_i = {
 	    year: y,
 	    em: em_y
@@ -887,7 +888,7 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	  return C2 + f1ph * y - m2 * y * y / 2 + m2 * y * (lastYear.year + x_half)
 	}
 
-	for (; y <= peakYear.year; ++y) {
+	for (; y <= peak_year; ++y) {
 	  em_y = f2(y)
 	  year_i = {
 	    year: y,
@@ -900,24 +901,64 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       }
     }
 
-    var allData = function(hist, peak, em0) {
-      var histToPeak = toPeak(y2016, 1.4, peak, em0)
-      return hist.concat(histToPeak).concat(peak).concat(em0)
+    var peakTo0 = function(peakYear, year0) {
+      var pad = 0.01
+      var emPad = pad * peakYear.em
+      var years = []
+      peak_year = Math.floor(peakYear.year)
+
+      var f = function(y) {
+	// return A * exp(-y^2/(2 * c))
+	var A = peakYear.em
+	var c = -1 * Math.pow((year0.year - peakYear.year), 2) / (2 * Math.log(pad))
+	return A * Math.exp(-1 * Math.pow((y - peakYear.year), 2) / (2 * c))
+      }
+      for (var y = peak_year + 1; y < year0.year; ++y) {
+	year = {
+	  year: y,
+	  em: f(y)
+	}
+	years.push(year)
+      }
+      return years
     }
+
+    var allData = function(hist, peak, em0) {
+      var finalYear = 2100
+      var histToPeak = toPeak(y2016, 1.4, peak, em0)
+      var peakToZero = peakTo0(peak, em0)
+      var zeroToEnd = []
+      for (var y = Math.floor(em0.year); y < finalYear; ++y) {
+	zeroToEnd.push({year: y, em: 0})
+      }
+      return hist.concat(histToPeak).concat(peakToZero).concat(zeroToEnd)
+    }
+
+    var sumEm = function(years) {
+      sum = 0
+      years.forEach(function(year) {
+	sum += year.em
+      });
+      return sum
+    }
+
+    margin = {top: 10, bottom: 10, left: 10, right: 10}
 
     var fakeData = [{year: 2015, em: 35}, {year: 2016, em: 36.4}]
     var y2016 = fakeData[1]
     var peak = {year: 2030, em: 40}
-    var em0 = {year: 2050, em: 0}
+    var em0 = {year: 2040, em: 0}
     var totalData = allData(fakeData, peak, em0)
     var chart = d3.select(".chart")
-    width = 1000
-    height = 600
-    chart.attr("width", width)
-    chart.attr("height", height)
+    
+    width = 1000 - margin.top - margin.bottom
+    height = 600 - margin.left - margin.right
+    chart.attr("width", width + margin.left + margin.right)
+    chart.attr("height", height + margin.bottom + margin.top)
+    chart.attr("transform", "translate(" + margin.left + ", " + margin.right + ")")
 
     x = d3.scaleLinear()
-      .domain([2012, 2050])
+      .domain([2012, 2100])
       .range([0, width])
     
     y = d3.scaleLinear()
@@ -925,18 +966,25 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       .range([height, 0])
     
     console.log("Width is " + width)
-    chart.selectAll(".emData")
-      .data(totalData)
-      .enter().append("circle")
-      .attr("cx", function(d) {return x(d.year)})
-      .attr("cy", function(d) {return y(d.em)})
-      .attr("r", 3)
-      .attr("class", "emData")
 
+    var barWidth = width / totalData.length;
+    
+    chart.selectAll(".emYear")
+      .data(totalData)
+      .enter().append("rect")
+      .attr("x", function(d) {return x(d.year)})
+      .attr("y", function(d) { return y(d.em); })
+      .attr("height", function(d) { return height - y(d.em); })
+      .attr("width", barWidth - 5)
+      .attr("class", "emYear")
+      .style("fill", "blue")
+
+    /*
     var line = d3.line()
 	.x(function(d) { return x(d.year) })
 	.y(function(d) { return y(d.em) })
-	.curve(d3.curveLinear);
+	.curve(d3.curveStepAfter);
+
     
     chart.append("path")
       .datum(totalData)
@@ -944,23 +992,62 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       .attr("d", line)
       .attr("fill", "none")
       .attr("stroke", "blue")
+*/
 
-    function dragged(d) {
+    chart.append("text")
+      .datum(totalData)
+      .attr("class", "legend")
+      .attr("transform", function(d, i) {
+	transx = width/4
+	transy = height * 3/4
+	return "translate(" + width*3/4 + "," + ((height * 1 / 4)) + ")"
+      })
+      .text(function(d) {return sumEm(d)})
+      .style("fill", "blue")
+      .style("font-size", "20px")
+
+    function dragged_peak(d) {
       d3.select(this).attr("cx", d3.event.x).attr("cy", d3.event.y);
       peak.year = x.invert(d3.event.x)
       peak.em = y.invert(d3.event.y)
       totalData = allData(fakeData, peak, em0)
-      chart.select("path")
+      chart.select(".legend")
 	.datum(totalData)
-        .attr("d", line)
+	.text(function(d) {return sumEm(d)})
+      chart.selectAll(".emYear")
+	.data(totalData)
+	.attr("x", function(d) {return x(d.year)})
+	.attr("y", function(d) { return y(d.em); })
+	.attr("height", function(d) { return height - y(d.em) ; })
+    }
+
+    function dragged_0(d) {
+      d3.select(this).attr("cx", d3.event.x);
+      em0.year = x.invert(d3.event.x)
+      totalData = allData(fakeData, peak, em0)
+      chart.select(".legend")
+	.datum(totalData)
+	.text(function(d) {return sumEm(d)})
+      chart.selectAll(".emYear")
+	.data(totalData)
+	.attr("x", function(d) {return x(d.year)})
+	.attr("y", function(d) { return y(d.em); })
+	.attr("height", function(d) {return height - y(d.em); })
     }
 
     chart.append("circle")
       .datum(peak)
       .attr("cx", function(d) {return x(d.year)})
       .attr("cy", function(d) {return y(d.em)})
-      .attr("r", 6)
-      .call(d3.drag().on("drag", dragged))
+      .attr("r", 10)
+      .call(d3.drag().on("drag", dragged_peak))
+
+    chart.append("circle")
+      .datum(em0)
+      .attr("cx", function(d) {return x(d.year)})
+      .attr("cy", y(0))
+      .attr("r", 10)
+      .call(d3.drag().on("drag", dragged_0))
 	    
   }]);
 
