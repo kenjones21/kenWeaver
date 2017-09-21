@@ -946,8 +946,8 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 
     var fakeData = [{year: 2015, em: 35}, {year: 2016, em: 36.4}]
     var y2016 = fakeData[1]
-    var peak = {year: 2030, em: 40}
-    var em0 = {year: 2040, em: 0}
+    var peak = {year: 2045, em: 50}
+    var em0 = {year: 2090, em: 0}
     var totalData = allData(fakeData, peak, em0)
     var chart = d3.select(".chart")
     
