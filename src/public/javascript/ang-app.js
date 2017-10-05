@@ -33,7 +33,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
 	return "Blog" + $stateParams.blogid + "Controller"
       }
     }).state('emissions', {
-      url: '/blog/emissions',
+      url: '/emissions',
       templateUrl: '/html/partials/emissions.html',
       controller: 'EmissionsController'
     })
@@ -822,6 +822,7 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 
     var toPeak = function(lastYear, ePrimeLastYear, peakYear, year0) {
       toPeakYears = []
+      toPeakYears.push(lastYear)
       if (lastYear.em > peakYear.em) {
 	console.log("Dragged it too low dipshit")
 	return []
@@ -859,8 +860,8 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	}
 	return toPeakYears
       }
+      
       else {
-
 	var h = delta_em/x_half - 0.5 * ePrimeLastYear
 	var m1 = (h - ePrimeLastYear) / x_half
 	var C1 = lastYear.em - ePrimeLastYear * lastYear.year +
@@ -923,32 +924,87 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       return years
     }
 
-    var allData = function(hist, peak, em0) {
+    var futureData = function(hist, peak, em0) {
       var finalYear = 2100
-      var histToPeak = toPeak(y2016, 1.4, peak, em0)
+      var histToPeak = toPeak(hist[hist.length - 1], 0.5, peak, em0)
       var peakToZero = peakTo0(peak, em0)
       var zeroToEnd = []
       for (var y = Math.floor(em0.year); y < finalYear; ++y) {
 	zeroToEnd.push({year: y, em: 0})
       }
-      return hist.concat(histToPeak).concat(peakToZero).concat(zeroToEnd)
+      return histToPeak.concat(peakToZero).concat(zeroToEnd)
     }
 
     var sumEm = function(years) {
       sum = 0
       years.forEach(function(year) {
 	sum += year.em
-      });
+      })
       return sum
     }
 
-    margin = {top: 10, bottom: 10, left: 10, right: 10}
+    var divideEmissions = function(futureData, budgetThresholds) {
+      // Divides emissions into n+1 parts, where n is length of budgetThresholds
+      var sum = 0
+      var i = 0
+      var threshold = budgetThresholds[0]
+      var retarr = [[]]
+      futureData.forEach(function(y) {
+	sum += y.em
+	if (sum > threshold) {
+	  retarr[i].push(y) // Need duplicates for fill to work
+	  retarr.push([])
+	  i += 1
+	  if (i < budgetThresholds.length) {
+	    threshold = budgetThresholds[i]
+	  }
+	  else {
+	    threshold = Number.MAX_VALUE
+	  }
+	}
+	retarr[i].push(y)
+      })
+      while (retarr.length < budgetThresholds.length + 1) {
+	retarr.push([])
+      }
+      return retarr
+    }
 
-    var fakeData = [{year: 2015, em: 35}, {year: 2016, em: 36.4}]
-    var y2016 = fakeData[1]
-    var peak = {year: 2045, em: 50}
-    var em0 = {year: 2090, em: 0}
-    var totalData = allData(fakeData, peak, em0)
+    var toNum = function(d) {
+      d.year = +d.Year
+      d.em = (+d.Total) * (44/12000)
+      return d
+    }
+    
+    margin = {top: 10, bottom: 10, left: 20, right: 10}
+    var thresholds2011 = [400, 1000, 2400]
+    var thresholss2017 = []
+    var peak = {year: 2050, em: 60}
+    var em0 = {year: 2080, em: 1}
+
+    var thresholdsTranslate = function(y1, y2, y1Thresholds, years) {
+      var thresholds = y1Thresholds.slice() // Copy y1Thresholds
+      for (i = 0; i < years.length; i++) {
+	yearObj = years[i]
+	year = yearObj.year
+	if (year >= y1 && year < y2) {
+	  em = yearObj.em
+	  for (j = 0; j < thresholds.length; ++j) {
+	    thresholds[j] -= em
+	  }
+	}
+      }
+      return thresholds
+    }
+    
+    d3.csv("/api/emissions_csv", toNum, function(error, data) {
+      var histData = data
+      var future = futureData(histData, peak, em0)
+      thresholds2017 = thresholdsTranslate(2011, 2017, thresholds2011, data)
+      var futureArr = divideEmissions(future, thresholds2017)
+      makeChart(histData, futureArr)
+    })
+    
     var chart = d3.select(".chart")
     
     width = 1000 - margin.top - margin.bottom
@@ -958,97 +1014,138 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
     chart.attr("transform", "translate(" + margin.left + ", " + margin.right + ")")
 
     x = d3.scaleLinear()
-      .domain([2012, 2100])
+      .domain([1955, 2100])
       .range([0, width])
     
     y = d3.scaleLinear()
       .domain([0, 60])
       .range([height, 0])
-    
-    console.log("Width is " + width)
 
-    var barWidth = width / totalData.length;
-    
-    chart.selectAll(".emYear")
-      .data(totalData)
-      .enter().append("rect")
-      .attr("x", function(d) {return x(d.year)})
-      .attr("y", function(d) { return y(d.em); })
-      .attr("height", function(d) { return height - y(d.em); })
-      .attr("width", barWidth - 5)
-      .attr("class", "emYear")
-      .style("fill", "blue")
+    var area = d3.area()
+	.x(function(d) {return x(d.year)})
+	.y0(height)
+	.y1(function(d) {return y(d.em)})
 
-    /*
-    var line = d3.line()
-	.x(function(d) { return x(d.year) })
-	.y(function(d) { return y(d.em) })
-	.curve(d3.curveStepAfter);
+    var colors = ["bisque", "#D17300", "darkred", "black"]
 
-    
-    chart.append("path")
-      .datum(totalData)
-      .attr("class", "line")
-      .attr("d", line)
-      .attr("fill", "none")
-      .attr("stroke", "blue")
-*/
-
-    chart.append("text")
-      .datum(totalData)
-      .attr("class", "legend")
-      .attr("transform", function(d, i) {
-	transx = width/4
-	transy = height * 3/4
-	return "translate(" + width*3/4 + "," + ((height * 1 / 4)) + ")"
-      })
-      .text(function(d) {return sumEm(d)})
-      .style("fill", "blue")
-      .style("font-size", "20px")
-
-    function dragged_peak(d) {
-      d3.select(this).attr("cx", d3.event.x).attr("cy", d3.event.y);
-      peak.year = x.invert(d3.event.x)
-      peak.em = y.invert(d3.event.y)
-      totalData = allData(fakeData, peak, em0)
-      chart.select(".legend")
-	.datum(totalData)
-	.text(function(d) {return sumEm(d)})
-      chart.selectAll(".emYear")
-	.data(totalData)
-	.attr("x", function(d) {return x(d.year)})
-	.attr("y", function(d) { return y(d.em); })
-	.attr("height", function(d) { return height - y(d.em) ; })
+    function drawHist(hist) {
+      // Draws hist on graph. Does not update or delete old hists
+      chart.append("path")
+	.datum(hist)
+	.attr("d", area)
+	.attr("class", "hist")
+	.style("fill", "grey")
     }
 
-    function dragged_0(d) {
-      d3.select(this).attr("cx", d3.event.x);
-      em0.year = x.invert(d3.event.x)
-      totalData = allData(fakeData, peak, em0)
-      chart.select(".legend")
-	.datum(totalData)
-	.text(function(d) {return sumEm(d)})
-      chart.selectAll(".emYear")
-	.data(totalData)
-	.attr("x", function(d) {return x(d.year)})
-	.attr("y", function(d) { return y(d.em); })
-	.attr("height", function(d) {return height - y(d.em); })
+    function drawFuture(futureArr) {
+      chart.selectAll(".future")
+	.data(futureArr, function(d, i) {return i})
+	.enter().append("path")
+      	.attr("d", area)
+	.attr("class", "future")
+	.style("fill", function(d, i) {
+	  return colors[i]
+	})
     }
 
-    chart.append("circle")
-      .datum(peak)
-      .attr("cx", function(d) {return x(d.year)})
-      .attr("cy", function(d) {return y(d.em)})
-      .attr("r", 10)
-      .call(d3.drag().on("drag", dragged_peak))
+    function drawLegend(futureArr) {
+      var future = [].concat.apply([], futureArr); // Flatten array
+      var sum = sumEm(future)
 
-    chart.append("circle")
-      .datum(em0)
-      .attr("cx", function(d) {return x(d.year)})
-      .attr("cy", y(0))
-      .attr("r", 10)
-      .call(d3.drag().on("drag", dragged_0))
-	    
+      chart.append("text")
+	.datum(sum)
+	.attr("class", "legend")
+	.attr("transform", function(d, i) {
+	  transx = width/4
+	  transy = height * 3/4
+	  return "translate(" + width*3/4 + "," + ((height * 1 / 4)) + ")"
+	})
+	.text(function(d) {return d})
+	.style("fill", "blue")
+	.style("font-size", "20px")
+    }
+
+    function updateLegend(futureArr) {
+      var future = [].concat.apply([], futureArr); // Flatten array
+      var sum = sumEm(future)
+      chart.select(".legend")
+	.datum(sum)
+	.text(function(d) {return d})
+    }
+
+    function updateFuture(futureArr) {
+      chart.selectAll(".future")
+	.data(futureArr)
+	.attr("d", area)
+	.style("fill", function(d, i) {return colors[i]})
+    }
+
+    function drawNodes(defaultPeak, default0, histData) {
+      
+      function dragged_peak(d) {
+	d3.select(this).attr("cx", d3.event.x).attr("cy", d3.event.y);
+	peak.year = x.invert(d3.event.x)
+	peak.em = y.invert(d3.event.y)
+	future = futureData(histData, peak, em0)
+	futureArr = divideEmissions(future, thresholds2017)
+	updateFuture(futureArr)
+	updateLegend(futureArr)
+      }
+
+      function dragged_0(d) {
+	d3.select(this).attr("cx", d3.event.x);
+	em0.year = x.invert(d3.event.x)
+	future = futureData(histData, peak, em0)
+	futureArr = divideEmissions(future, thresholds2017)
+	updateFuture(futureArr)
+	updateLegend(futureArr)
+      }
+
+      chart.append("circle")
+	.datum(peak)
+	.attr("cx", function(d) {return x(d.year)})
+	.attr("cy", function(d) {return y(d.em)})
+	.attr("r", 10)
+	.call(d3.drag().on("drag", dragged_peak))
+
+      chart.append("circle")
+	.datum(em0)
+	.attr("cx", function(d) {return x(d.year)})
+	.attr("cy", y(0))
+	.attr("r", 10)
+	.call(d3.drag().on("drag", dragged_0))
+    }
+
+    function drawAxes() {
+      var xAxis = d3.axisBottom(x),
+	  yAxis = d3.axisLeft(y)
+
+      xAxis.tickFormat(d3.format("d"))
+      yAxis.tickPadding(15)
+      
+      chart.append("g")
+	.attr("class", "x_axis axis")
+	.attr("transform", "translate(0," + height + ")")
+	.call(xAxis)
+
+      chart.append("g")
+	.attr("class", "y_axis axis")
+	.call(yAxis)
+	.append("text")
+	.attr("transform", "rotate(-90)")
+	.attr("y", 6)
+	.attr("dy", ".71em")
+	.style("text-anchor", "end")
+	.text("Mt CO2/yr")
+    }
+
+    function makeChart(histData, futureArr) {
+      drawHist(histData)
+      drawFuture(futureArr)
+      drawLegend(futureArr)
+      drawNodes(peak, em0, histData)
+      drawAxes()
+    }
   }]);
 
 

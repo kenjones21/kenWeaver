@@ -172,13 +172,13 @@ def export(filename, x, yarr):
 
 readFile("../res/ar5_scenarios.csv")
 excProb = exceedanceProbabilities()
-temp = "4.0"
+temp = "1.5"
 a = maxExceedanceProbabilities(excProb, temp)
 b = emissionsSums()
 merged = mergeExcSums(a, b)
 sums, probs = getXY(merged)
 sums, probs = sortXY(sums, probs)
-lowess = sm.nonparametric.lowess(probs, sums, frac=0.25)
+lowess = sm.nonparametric.lowess(probs, sums, frac=0.20)
 export("../res/four.csv", sums, [probs, lowess[:, 1]])
 plt.scatter(sums, probs, s=10)
 plt.plot(lowess[:, 0], lowess[:, 1], color="red")
