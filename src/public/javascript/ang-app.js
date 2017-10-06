@@ -615,7 +615,6 @@ app.controller('Blog20170808Controller', ['$scope', '$window', '$location', '$co
 	.style("stroke-dasharray", ("5, 2"))
 	.attr("d", line)
 
-
       chart.append("g")
 	.attr("class", "x_axis axis")
 	.attr("transform", "translate(0," + height + ")")
@@ -976,10 +975,12 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       return d
     }
     
-    margin = {top: 10, bottom: 10, left: 20, right: 10}
+    var margin = {top: 10, right: 20, bottom: 30, left: 40}
     var thresholds2011 = [400, 1000, 2400]
     var thresholss2017 = []
-    var peak = {year: 2050, em: 60}
+    var default_peak = {year: 2050, em: 60}
+    var paris_peak = {year: 2030, em: 38.5}
+    var peak = paris_peak
     var em0 = {year: 2080, em: 1}
 
     var thresholdsTranslate = function(y1, y2, y1Thresholds, years) {
@@ -1004,14 +1005,14 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       var futureArr = divideEmissions(future, thresholds2017)
       makeChart(histData, futureArr)
     })
-    
+
+    width = 1000 - margin.left - margin.right
+    height = 600 - margin.bottom - margin.top
     var chart = d3.select(".chart")
-    
-    width = 1000 - margin.top - margin.bottom
-    height = 600 - margin.left - margin.right
-    chart.attr("width", width + margin.left + margin.right)
-    chart.attr("height", height + margin.bottom + margin.top)
-    chart.attr("transform", "translate(" + margin.left + ", " + margin.right + ")")
+	.attr("width", width + margin.left + margin.right)
+	.attr("height", height + margin.bottom + margin.top)
+	.append("g")
+	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     x = d3.scaleLinear()
       .domain([1955, 2100])
@@ -1105,14 +1106,18 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	.datum(peak)
 	.attr("cx", function(d) {return x(d.year)})
 	.attr("cy", function(d) {return y(d.em)})
-	.attr("r", 10)
+	.attr("r", 15)
+	.style("fill", "white")
+	.style("stroke", "grey")
 	.call(d3.drag().on("drag", dragged_peak))
 
       chart.append("circle")
 	.datum(em0)
 	.attr("cx", function(d) {return x(d.year)})
 	.attr("cy", y(0))
-	.attr("r", 10)
+	.attr("r", 15)
+	.style("fill", "white")
+	.style("stroke", "grey")
 	.call(d3.drag().on("drag", dragged_0))
     }
 
