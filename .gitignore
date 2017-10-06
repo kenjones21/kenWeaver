@@ -10,6 +10,8 @@ src/public/html/Test/
 **/angular-ui-router.min.js
 src/public/images
 res/*
+*.pyc
+*/__pycache__/*
 
 # --------------------
 # Standard files to ignore
