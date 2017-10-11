@@ -129,6 +129,11 @@ router.get('/emissions_csv', function(req, res, next) {
     console.log("Sent file")
 });
 
+router.get('/budget_prob/:temp', function(req, res, next) {
+  console.log("Temperature exceedance probability file request")
+  res.sendFile("./res/" + req.params.temp, {root: "."})
+});
+
 router.get('/comments/:blogPostId', function(req, res, next) {
   Comment.find({blogPostId: req.params.blogPostId}, function(err, comments) {
     if (err) return next(err);

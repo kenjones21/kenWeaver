@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
@@ -66,7 +68,36 @@ def avgTotalEmissions(year0, year1, em0, em1):
         return 0
     return (y1 - y0) * ((e0 + e1) / 2)
 
-def emissionsSum(datum):
+def interpolate(datum, year):
+    keys = datum.keys()
+    years = []
+    for key in keys:
+        if key[0] == "2" and datum[key] != "":
+            years.append(key)
+    years = sorted(years)
+    if year in years:
+        return datum[year]
+    prevYear = years[0]
+    for y in years:
+        if year > float(prevYear) and year < float(y):
+            dif = float(year) - float(prevYear)
+            span = float(y) - float(prevYear)
+            em = float(datum[y])
+            emPrev = float(datum[prevYear])
+            return dif/span*(em - emPrev) + emPrev
+        prevYear = y
+
+def subtractTo(theSum, datum, year):
+    keys = datum.keys()
+    years = []
+    for key in keys:
+        if key[0] == "2" and datum[key] != "":
+            years.append(key)
+    years = sorted(years)
+    yearPrev = years[0]
+    emPrev = datum[yearPrev]
+
+def emissionsSum(datum, startYear):
     keys = datum.keys()
     years = []
     for key in keys:
@@ -77,12 +108,19 @@ def emissionsSum(datum):
     yearPrev = years[0]
     emPrev = datum[yearPrev]
     for year in years:
-        em = datum[year]
-        totalEm += avgTotalEmissions(yearPrev, year, emPrev, em)
-        yearPrev, emPrev = year, datum[year]
-    return totalEm
+        if float(year) <= startYear:
+            yearPrev, emPrev = year, datum[year]
+        else:
+            em = datum[year]
+            if startYear > float(yearPrev):
+                yearPrev = startYear
+                emPrev = interpolate(datum, startYear)
+                # Ignore years up to startYear
+            totalEm += avgTotalEmissions(yearPrev, year, emPrev, em)
+            yearPrev, emPrev = year, datum[year]
+    return totalEm / 1000 # Convert to gigatons
 
-def emissionsSums():
+def emissionsSums(startYear):
     modelScenarioPairs = []
     sums = {}
     for datum in data:
@@ -90,7 +128,7 @@ def emissionsSums():
         pair = (model, scenario)
         if datum["VARIABLE"] == "Emissions|CO2":
             try:
-                theSum = emissionsSum(datum)
+                theSum = emissionsSum(datum, startYear)
             except ValueError:
                 print("womp")
                 continue
@@ -125,6 +163,14 @@ def maxExceedanceProbabilities(exceedanceProbabilities, temp):
         retdict[pair] = maxProb
     return retdict
 
+def exceedance2100(exceedanceProbabilities, temp):
+    retdict = {}
+    for pair in exceedanceProbabilities:
+        tempRecord = exceedanceProbabilities[pair][temp]
+        prob = float(tempRecord['2100'])
+        retdict[pair] = prob
+    return retdict
+
 def mergeExcSums(exc, sums):
     merged = {}
     for pair in sums:
@@ -148,15 +194,13 @@ def sortXY(x, y):
     xy = list(zip(*sortedzip))
     return xy[0], xy[1]
 
-
-    return y_smooth
-
 def export(filename, x, yarr):
     for y in yarr:
         if len(y) != len(x):
             print(len(yarr), len(x))
             raise ValueError("Arrays are different lengths")
     f = open(filename, 'w')
+    f.write("Emissions,ExceedanceProbability,Smooth\n")
     for i in range(0, len(x)):
         f.write(str(x[i]))
         for y in yarr:
@@ -171,16 +215,26 @@ def export(filename, x, yarr):
     f.close()
 
 readFile("../res/ar5_scenarios.csv")
-excProb = exceedanceProbabilities()
-temp = "1.5"
-a = maxExceedanceProbabilities(excProb, temp)
-b = emissionsSums()
-merged = mergeExcSums(a, b)
-sums, probs = getXY(merged)
-sums, probs = sortXY(sums, probs)
-lowess = sm.nonparametric.lowess(probs, sums, frac=0.20)
-export("../res/four.csv", sums, [probs, lowess[:, 1]])
-plt.scatter(sums, probs, s=10)
-plt.plot(lowess[:, 0], lowess[:, 1], color="red")
-plt.title("Probability of Exceedance, " + temp + " degrees C")
-plt.show()
+temps = ["1.5", "2.0", "3.0", "4.0"]
+outfilenames = ["one_five", "two", "three", "four"]
+for i in range(0, 4):
+    temp = temps[i]
+    excProb = exceedanceProbabilities()
+    a = maxExceedanceProbabilities(excProb, temp)
+    b = emissionsSums(2017)
+    c = exceedance2100(excProb, temp)
+    print(c)
+    merged = mergeExcSums(c, b)
+    sums, probs = getXY(merged)
+    sums, probs = sortXY(sums, probs)
+    lowess = sm.nonparametric.lowess(probs, sums, frac=0.20)
+    export("../res/" + outfilenames[i] + ".csv", sums, [probs, lowess[:, 1]])
+
+# plt.scatter(sums, probs, s=10)
+# plt.plot(lowess[:, 0], lowess[:, 1], color="red")
+# plt.title("Probability of Exceedance, " + temp + " degrees C")
+# plt.show()
+
+# TESTS
+# testYear = data[76]
+# print(emissionsSum(testYear, 2009) - emissionsSum(testYear, 2010))
