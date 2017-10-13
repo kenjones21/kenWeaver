@@ -194,13 +194,16 @@ def sortXY(x, y):
     xy = list(zip(*sortedzip))
     return xy[0], xy[1]
 
-def export(filename, x, yarr):
+def export(filename, x, yarr, columns):
     for y in yarr:
         if len(y) != len(x):
             print(len(yarr), len(x))
             raise ValueError("Arrays are different lengths")
     f = open(filename, 'w')
-    f.write("Emissions,ExceedanceProbability,Smooth\n")
+    for column in columns:
+        f.write(column)
+        f.write(",")
+    f.write("\n")
     for i in range(0, len(x)):
         f.write(str(x[i]))
         for y in yarr:
@@ -214,9 +217,13 @@ def export(filename, x, yarr):
         f.write("\n")
     f.close()
 
+def smoothGaussianIntegral(x, y):
+    
+
 readFile("../res/ar5_scenarios.csv")
 temps = ["1.5", "2.0", "3.0", "4.0"]
-outfilenames = ["one_five", "two", "three", "four"]
+columnNames = ["one_five", "two", "three", "four"]
+smoothedExcProbs = []
 for i in range(0, 4):
     temp = temps[i]
     excProb = exceedanceProbabilities()
@@ -227,8 +234,9 @@ for i in range(0, 4):
     merged = mergeExcSums(c, b)
     sums, probs = getXY(merged)
     sums, probs = sortXY(sums, probs)
-    lowess = sm.nonparametric.lowess(probs, sums, frac=0.20)
-    export("../res/" + outfilenames[i] + ".csv", sums, [probs, lowess[:, 1]])
+    lowess = sm.nonparametric.lowess(probs, sums, frac=0.30)
+    smoothedExcProbs.append(lowess)
+export("../res/budget.csv", sums, smoothedExcProbs)
 
 # plt.scatter(sums, probs, s=10)
 # plt.plot(lowess[:, 0], lowess[:, 1], color="red")

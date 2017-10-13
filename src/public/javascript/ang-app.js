@@ -817,7 +817,9 @@ app.controller('Blog20170913Controller', ['$scope', '$window', '$location', '$co
 
 app.controller('EmissionsController', ['$scope', '$location', '$http',
   function($scope, $location, $http) {
-    // Controller for emissions sliders
+    /*
+                        --- INTERPOLATION FUNCTIONS ---
+    */
 
     var toPeak = function(lastYear, ePrimeLastYear, peakYear, year0) {
       toPeakYears = []
@@ -934,6 +936,10 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       return histToPeak.concat(peakToZero).concat(zeroToEnd)
     }
 
+    /*
+                        --- UTILITY FUNCTIONS ---
+    */
+
     var sumEm = function(years) {
       sum = 0
       years.forEach(function(year) {
@@ -974,36 +980,10 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       d.em = (+d.Total) * (44/12000)
       return d
     }
-    
-    var margin = {top: 10, right: 20, bottom: 30, left: 40}
-    var thresholds2011 = [400, 1000, 2400]
-    var thresholss2017 = []
-    var default_peak = {year: 2050, em: 60}
-    var paris_peak = {year: 2030, em: 38.5}
-    var committed_peak = {year: 2017, em: 36.51}
-    var committed_em0 = {year: 2064.5, em: 0}
-    var peak = Object.assign({}, default_peak)
-    var em0 = {year: 2080, em: 1}
-    var histData = []
 
-    $scope.paris = function() {
-      peak = Object.assign({}, paris_peak)
-      var future = futureData(histData, peak, em0)
-      var futureArr = divideEmissions(future, thresholds2017)
-      updateFuture(futureArr)
-      updatePeak(peak)
-      updateLegend(futureArr)
-    }
-
-    $scope.committed = function() {
-      peak = Object.assign({}, committed_peak)
-      em0 = Object.assign({}, committed_em0)
-      var future = futureData(histData, peak, em0)
-      var futureArr = divideEmissions(future, thresholds2017)
-      updateFuture(futureArr)
-      updatePeak(peak)
-      updateEm0(em0)
-      updateLegend(futureArr)
+    function num(d) {
+      d.em = +d.Emissions
+      return d
     }
 
     var thresholdsTranslate = function(y1, y2, y1Thresholds, years) {
@@ -1020,17 +1000,56 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       }
       return thresholds
     }
-    
-    d3.csv("/api/emissions_csv", toNum, function(error, data) {
-      histData = data
-      var future = futureData(histData, peak, em0)
-      thresholds2017 = thresholdsTranslate(2011, 2017, thresholds2011, data)
-      var futureArr = divideEmissions(future, thresholds2017)
-      makeChart(histData, futureArr)
-    })
 
-    width = 1000 - margin.left - margin.right
-    height = 600 - margin.bottom - margin.top
+    function find(exceedanceData, emissions) {
+      prevDatum = exceedanceData[0]
+      if (emissions < prevDatum.smooth) {
+	return -1 // -1 if emissions are too small for dataset
+      }
+      for (var i = 0; i < exceedanceData.length; ++i) {
+	datum = exceedanceData[i]
+	if (emissions < datum.em && emissions > prevDatum.em) {
+	  return i
+	}
+      }
+      return exceedanceData.length // If it's beyond dataset, return length of dataset
+    }
+
+    function estimateExceedanceProbability(exceedanceData, emissions){
+      if (!exceedanceData) {
+	console.log("notta")
+	return 0
+      }
+      index = find(exceedanceData, emissions)
+      var ret = exceedanceData[index]
+      return ret.Smooth
+    }
+
+    //             --- DATA VARIABLES ---
+
+    var thresholds2011 = [400, 1000, 2400]
+    var thresholds2017 = []
+    var default_peak = {year: 2050, em: 60}
+    var paris_peak = {year: 2030, em: 38.5}
+    var committed_peak = {year: 2017, em: 36.51}
+    var committed_em0 = {year: 2064.5, em: 0}
+    var peak = Object.assign({}, default_peak)
+    var em0 = {year: 2080, em: 1}
+    var histData = []
+    var probs = [0, 0, 0, 0]
+
+    //            --- CHART VARIABLES ---
+    
+    var margin = {top: 10, right: 20, bottom: 30, left: 40}
+    var barMargin = {top: 10, right: 20, bottom: 30, left: 20}
+    var width = 800 - margin.left - margin.right
+    var height = 600 - margin.bottom - margin.top
+    var r = 15
+    var barGraphWidth = width + margin.left + margin.right - barMargin.left - barMargin.right
+    var barGraphHeight = height + margin.bottom + margin.top - barMargin.top - barMargin.bottom
+    var barHeight = 75
+    var barSpace = (barGraphHeight - 4 * barHeight) / 4
+
     var chart = d3.select(".chartDiv")
 	.append("svg")
 	.attr("class", "emissionsChart")
@@ -1038,6 +1057,14 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	.attr("height", height + margin.bottom + margin.top)
 	.append("g")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    var barChart = d3.select(".chartDiv")
+	.append("svg")
+	.attr("class", "barChart")
+	.attr("width", barGraphWidth + barMargin.left + barMargin.right)
+	.attr("height", barGraphHeight + barMargin.top + barMargin.bottom)
+	.append("g")
+	.attr("transform", "translate(" + barMargin.left + "," + barMargin.top + ")");
+    var tempDict = {}
 
     x = d3.scaleLinear()
       .domain([1955, 2100])
@@ -1047,12 +1074,43 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       .domain([0, 60])
       .range([height, 0])
 
+    var barX = d3.scaleLinear()
+	.range([0, barGraphWidth])
+	.domain([0, 1])
+
     var area = d3.area()
 	.x(function(d) {return x(d.year)})
 	.y0(height)
 	.y1(function(d) {return y(d.em)})
 
     var colors = ["#fef0d9", "#fdcc8a", "#fc8d59", "#d7301f"]
+    var temps = ["one_five", "two", "three", "four"]
+
+    //          --- CONTROLLER FUNCTIONS ---
+    
+    $scope.paris = function() {
+      peak = Object.assign({}, paris_peak)
+      var future = futureData(histData, peak, em0)
+      var futureArr = divideEmissions(future, thresholds2017)
+      updateFuture(futureArr)
+      updatePeak(peak)
+      updateLegend(futureArr)
+      updateBarWidth(futureArr)
+    }
+
+    $scope.committed = function() {
+      peak = Object.assign({}, committed_peak)
+      em0 = Object.assign({}, committed_em0)
+      var future = futureData(histData, peak, em0)
+      var futureArr = divideEmissions(future, thresholds2017)
+      updateFuture(futureArr)
+      updatePeak(peak)
+      updateEm0(em0)
+      updateLegend(futureArr)
+      updateBarWidth(futureArr)
+    }
+
+    //               --- CHART FUNCTIONS
 
     function drawHist(hist) {
       // Draws hist on graph. Does not update or delete old hists
@@ -1126,9 +1184,9 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	futureArr = divideEmissions(future, thresholds2017)
 	updateFuture(futureArr)
 	updateLegend(futureArr)
+	updateBarWidth(futureArr)
       }
 
-      var r = 15
       chart.append("circle")
 	.datum(peak)
 	.attr("cx", function(d) {return x(d.year)})
@@ -1161,7 +1219,7 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       d3.select(".em0")
 	.datum(em0)
 	.attr("cx", function(d) {return x(d.year)})
-	.attr("cy", function(d) {return y(d.em)})
+	.attr("cy", function(d) {return y(0) - r})
     }
 
     function drawAxes() {
@@ -1193,67 +1251,85 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       drawLegend(futureArr)
       drawNodes(peak, em0, histData)
       drawAxes()
-      makeBarChart(sumEm(futureArr))
-    }
-
-    function find(exceedanceData, emissions) {
-      prevDatum = exceedanceData[0]
-      if (emissions < prevDatum.smooth) {
-	return -1 // -1 if emissions are too small for dataset
-      }
-      for (i = 0; i < exceedanceData.length; ++i) {
-	datum = exceedanceData[i]
-	if (emissions < datum.em && emissions > prevDatum.em) {
-	  return i
-	}
-      }
-      return exceedanceData.length // If it's beyond dataset, return length of dataset
-    }
-
-    function estimateExceedanceProbability(exceedanceData, emissions){
-      console.log(exceedanceData)
-      index = find(exceedanceData, emissions)
-      console.log(exceedanceData.length)
-      console.log(index)
-      ret = exceedanceData[find(exceedanceData, emissions)]
-      console.log(ret)
-      return ret.Smooth
+      var emissionsSum = sumEm([].concat.apply([], futureArr))
+      makeBarChart(emissionsSum)
+      drawBarAxis()
+      drawBarLines()
     }
 
     function makeBarChart(emissionsSum) {
-      console.log(emissionsSum)
-      var barGraphWidth = 400
-      var barGraphHeight = 800
-      var barChart = d3.select(".chartDiv")
-	  .append("svg")
-	  .attr("class", "barChart")
-
-      var barX = d3.scaleLinear()
-	  .range([0, barGraphWidth])
-	  .domain([0, 1])
-
-      var tempDict = {}
-
-      function num(d) {
-	d.em = +d.Emissions
-	return d
+      for (var i = 0; i < temps.length; ++i) {
+	t = temps[i]
+	probs[i] = estimateExceedanceProbability(tempDict[t], emissionsSum)
       }
-
-      d3.csv("/api/budget_prob/two.csv", num, function(error, data) {
-	tempDict.two = data
-	barChart.append("rect")
-	  .datum(estimateExceedanceProbability(tempDict.two, emissionsSum))
-	  .attr("class", "bar")
-	  .attr("height", 100)
-	  .attr("width", function(d) {return barX(d)})
-      })
+      barChart.selectAll(".prob")
+	.data(probs)
+	.enter().append("rect")
+	.attr("class", "prob")
+      	.attr("width", function(d) {return barX(d)})
+	.attr("height", barHeight)
+	.attr("transform", function(d, i) {
+	  translate = barHeight * i + (1/2 + i) * barSpace
+	  console.log(translate)
+	  return "translate(0," + translate + ")"
+	})
+	.style("fill", function(d, i) {return colors[i]})
     }
 
     function updateBarWidth(futureArr) {
+      var future = [].concat.apply([], futureArr)
       var sum = sumEm(future)
-      barChart.select(".bar")
-	.datum(estimateExceedanceProbability(tempDict.two, emissionsSum))
-	.attr("width", function(d) {return barX(d)})
+      function check (l, max) {
+	return l < max
+      }
+      for (var i = 0; i < temps.length; ++i) {
+	t = temps[i]
+	probs[i] = estimateExceedanceProbability(tempDict[t], sum)
+      }
+      barChart.selectAll(".prob")
+	.data(probs)
+      	.attr("width", function(d) {return barX(d)})
+    }
+
+    function drawBarAxis() {
+      var barXAxis = d3.axisBottom(barX)
+      barXAxis.tickFormat(d3.format(".0%"))
+      barChart.append("g")
+	.attr("class", "x_axis axis")
+	.attr("transform", "translate(0," + barGraphHeight + ")")
+	.style("fill", "white")
+	.call(barXAxis)
+    }
+
+    function drawBarLines() {
+      var x0 = barX(0.33333)
+      var line = barChart.append("line")
+	  .attr("display", null)
+	  .style("stroke", "black")
+      	  .style("stroke-dasharray", ("5, 2"))
+	  .attr("x1", x0)
+	  .attr("y1", 0)
+	  .attr("x2", x0)
+	  .attr("y2", height);
+    }
+
+    d3.csv("/api/emissions_csv", toNum, function(error, data) {
+      histData = data
+      var future = futureData(histData, peak, em0)
+      thresholds2017 = thresholdsTranslate(2011, 2017, thresholds2011, data)
+      var futureArr = divideEmissions(future, thresholds2017)
+      makeChart(histData, futureArr)
+    })
+
+    function addTempToDict(temp) {
+      d3.csv("/api/budget_prob/" + temp + ".csv", num, function(error, data) {
+	tempDict[temp] = data
+      })
+    }
+    
+    for (i = 0; i < temps.length; ++i) {
+      temp = temps[i]
+      addTempToDict(temp)
     }
   }]);
 

@@ -134,6 +134,10 @@ router.get('/budget_prob/:temp', function(req, res, next) {
   res.sendFile("./res/" + req.params.temp, {root: "."})
 });
 
+router.get('budget_probs', function(req, res, next) {
+  
+});
+
 router.get('/comments/:blogPostId', function(req, res, next) {
   Comment.find({blogPostId: req.params.blogPostId}, function(err, comments) {
     if (err) return next(err);
