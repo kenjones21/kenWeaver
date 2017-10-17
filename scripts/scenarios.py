@@ -249,12 +249,11 @@ def interpolateFun(xi, xFun, yFun):
 def gaussInt(params, minimum, maximum):
     x = np.linspace(minimum, maximum, 1000)
     y = []
-    minm = min(m)
-    prevN = m[0]
-    theSum = integrate(gaussian, params["b"] - 5 * params["c"], prevN, 0.1, params)
-    for n in x:
-        theSum += integrate(gaussian, prevN, n, 0.1, params)
-        prevN = n
+    prevX = x[0]
+    theSum = integrate(gaussian, params["b"] - 5 * params["c"], prevX, 0.1, params)
+    for xi in x:
+        theSum += integrate(gaussian, prevX, xi, 0.1, params)
+        prevX = xi
         y.append(theSum)
     return x, y
 
@@ -300,7 +299,7 @@ param3 = {"b": 3035, "c": 1355}
 # 3.0: 3035, 1355
 param4 = {"b": 5114, "c": 2027}
 # 4.0: 5114, 2027
-temps = ["one_five", "two", "three", "four"]
+temps = ["","one_five", "two", "three", "four"]
 allparams = [param1_5, param2, param3, param4]
 
 temp = "2.0"
@@ -320,7 +319,7 @@ for i in range(0, 4):
     gaussX, gaussY = gaussInt(param, min(sums) - pad, max(sums) + pad)
     print(len(gaussX), len(gaussY))
     yFuns.append(gaussY)
-export("smoothed.csv", gaussX, yFuns, temps)
+export("../res/smoothed.csv", gaussX, yFuns, temps)
 
 """    
 barr = np.linspace(95, 100, 20)
