@@ -4,6 +4,8 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 import statsmodels.api as sm
+import scipy.optimize as opt
+import math
 
 data = []
 
@@ -197,7 +199,7 @@ def sortXY(x, y):
 def export(filename, x, yarr, columns):
     for y in yarr:
         if len(y) != len(x):
-            print(len(yarr), len(x))
+            print(len(y), len(x))
             raise ValueError("Arrays are different lengths")
     f = open(filename, 'w')
     for column in columns:
@@ -216,33 +218,170 @@ def export(filename, x, yarr, columns):
                 f.write(str(y[i]))
         f.write("\n")
     f.close()
+    return
 
-def smoothGaussianIntegral(x, y):
-    
+def integrate(function, begin, end, step, params):
+    x = begin
+    integral = 0
+    while (x < end):
+        val = function(x, params)
+        integral += val * step
+        x += step
+    return integral
 
+def gaussian(x, params):
+    b = params["b"]
+    c = params["c"]
+    a = 1 / math.sqrt(2 * math.pi * c ** 2)
+    return a * math.exp(- ((x - b) ** 2) / (2 * c ** 2))
+
+def interpolateFun(xi, xFun, yFun):
+    index = 0
+    while xFun[index] < xi:
+        index += 1
+    x1 = xFun[index-1]
+    x2 = xFun[index]
+    y1 = yFun[index-1]
+    y2 = yFun[index]
+    m = (y2 - y1)/(x2 - x1)
+    return y1 + m * (xi - x1)
+
+def gaussInt(params, minimum, maximum):
+    x = np.linspace(minimum, maximum, 1000)
+    y = []
+    minm = min(m)
+    prevN = m[0]
+    theSum = integrate(gaussian, params["b"] - 5 * params["c"], prevN, 0.1, params)
+    for n in x:
+        theSum += integrate(gaussian, prevN, n, 0.1, params)
+        prevN = n
+        y.append(theSum)
+    return x, y
+
+def squares1(xFun, yFun, xarr, yarr):
+    sumsq = 0
+    for i in range(0, len(xarr)):
+        x, y = xarr[i], yarr[i]
+        interpolation = interpolateFun(x, xFun, yFun)
+        sumsq += (y - interpolation) ** 2
+    return sumsq
+
+def squares(params):
+    # Assume sums, probs are already defined
+    pad = 100
+    paramDict = {"b": params[0], "c": params[1]}
+    gaussX, gaussY = gaussInt(paramDict, min(sums) - pad, max(sums) + pad)
+    return squares1(gaussX, gaussY, sums, probs)
+        
 readFile("../res/ar5_scenarios.csv")
-temps = ["1.5", "2.0", "3.0", "4.0"]
-columnNames = ["one_five", "two", "three", "four"]
-smoothedExcProbs = []
+# temps = ["1.5", "2.0", "3.0", "4.0"]
+# columnNames = ["one_five", "two", "three", "four"]
+# smoothedExcProbs = []
+# for i in range(0, 4):
+#     temp = temps[i]
+#     excProb = exceedanceProbabilities()
+#     a = maxExceedanceProbabilities(excProb, temp)
+#     b = emissionsSums(2017)
+#     c = exceedance2100(excProb, temp)
+#     print(c)
+#     merged = mergeExcSums(c, b)
+#     sums, probs = getXY(merged)
+#     sums, probs = sortXY(sums, probs)
+#     lowess = sm.nonparametric.lowess(probs, sums, frac=0.30)
+#     smoothedExcProbs.append(lowess)
+# export("../res/budget.csv", sums, smoothedExcProbs
+
+# Params:
+param1_5 = {"b": 97, "c": 890}
+# 1.5: 97, 890
+param2 = {"b": 1163, "c": 983}
+# 2.0: 1163, 983
+param3 = {"b": 3035, "c": 1355}
+# 3.0: 3035, 1355
+param4 = {"b": 5114, "c": 2027}
+# 4.0: 5114, 2027
+temps = ["one_five", "two", "three", "four"]
+allparams = [param1_5, param2, param3, param4]
+
+temp = "2.0"
+excProb = exceedanceProbabilities()
+d = maxExceedanceProbabilities(excProb, temp)
+e = emissionsSums(2017)
+f = exceedance2100(excProb, temp)
+merged = mergeExcSums(f, e)
+sums, probs = getXY(merged)
+sums, probs = sortXY(sums, probs)
+
+yFuns = []
 for i in range(0, 4):
     temp = temps[i]
-    excProb = exceedanceProbabilities()
-    a = maxExceedanceProbabilities(excProb, temp)
-    b = emissionsSums(2017)
-    c = exceedance2100(excProb, temp)
-    print(c)
-    merged = mergeExcSums(c, b)
-    sums, probs = getXY(merged)
-    sums, probs = sortXY(sums, probs)
-    lowess = sm.nonparametric.lowess(probs, sums, frac=0.30)
-    smoothedExcProbs.append(lowess)
-export("../res/budget.csv", sums, smoothedExcProbs)
+    param = allparams[i]
+    pad = 100
+    gaussX, gaussY = gaussInt(param, min(sums) - pad, max(sums) + pad)
+    print(len(gaussX), len(gaussY))
+    yFuns.append(gaussY)
+export("smoothed.csv", gaussX, yFuns, temps)
 
-# plt.scatter(sums, probs, s=10)
-# plt.plot(lowess[:, 0], lowess[:, 1], color="red")
-# plt.title("Probability of Exceedance, " + temp + " degrees C")
-# plt.show()
+"""    
+barr = np.linspace(95, 100, 20)
+carr = np.linspace(870, 910, 20)
+paramStart = [4000, 1200]
+minb = 0
+minc = 0
+fits = []
+optObj = opt.minimize(squares,paramStart)
+optX = optObj.x
+#optX = [3000, 1200]
+print("b, c is ", optX)
 
+for b in barr:
+    params["b"] = b
+    for c in carr:
+        params["c"] = c
+        x, y = gaussInt(params, min(sums) - 100, max(sums) + 100)
+        sq1 = squares1(x, y, sums, probs)
+        fits.append(sq1)
+        if sq1 < minsum:
+            print("sumsq for b, c ", b, c, " is ", sq1)
+            minb, minc = b, c
+            minsum = sq1
+# Fit says 1163 983 minimum for 2C
+fits = np.reshape(fits, [len(barr), len(carr)])
+print(fits)
+fig, ax = plt.subplots()
+im = ax.imshow(fits, extent=[min(carr),max(carr), max(barr), min(barr)])
+fig.colorbar(im)
+
+ax.axis('tight')
+plt.show()
+print("Min b, c", b, c)
+
+params = {"b": optX[0], "c": optX[1]}
+m = np.linspace(min(sums) - 100, max(sums) + 100, 100)
+y = []
+minm = min(m)
+prevN = m[0]
+theSum = integrate(gaussian, params["b"] - 5 * params["c"], prevN, 0.1, params)
+for n in m:
+    theSum += integrate(gaussian, prevN, n, 0.1, params)
+    prevN = n
+    y.append(theSum)
+
+plt.scatter(sums, probs, s=10)
+plt.plot(m, y, color="red")
+plt.title("Probability of Exceedance, " + temp + " degrees C")
+plt.show()
+"""
 # TESTS
 # testYear = data[76]
 # print(emissionsSum(testYear, 2009) - emissionsSum(testYear, 2010))
+# params = {"b": 0, "c": 3}
+# m = np.linspace(-5, 5, 500)
+# y = []
+# print(m)
+# for n in m:
+#     y.append(integrate(gaussian, -6, n, 0.1, params))
+# plt.scatter(m, y)
+# plt.show()
+#val = integrate(gaussian, -100, 100, 0.01, params)
+#print("Expected 1, val is " + str(val))
