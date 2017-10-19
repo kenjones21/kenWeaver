@@ -134,8 +134,9 @@ router.get('/budget_prob/:temp', function(req, res, next) {
   res.sendFile("./res/" + req.params.temp, {root: "."})
 });
 
-router.get('budget_probs', function(req, res, next) {
-  
+router.get('/smoothed_csv', function(req, res, next) {
+    console.log("Smoothed csv request")
+    res.sendFile("./res/smoothed.csv", {root: "."})
 });
 
 router.get('/comments/:blogPostId', function(req, res, next) {

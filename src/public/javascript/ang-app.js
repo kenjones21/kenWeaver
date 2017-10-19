@@ -975,7 +975,7 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       return retarr
     }
 
-    var toNum = function(d) {
+    function toNum(d){
       d.year = +d.Year
       d.em = (+d.Total) * (44/12000)
       return d
@@ -986,7 +986,16 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       return d
     }
 
-    var thresholdsTranslate = function(y1, y2, y1Thresholds, years) {
+    function numSmooth(d) {
+      for (var key in d) {
+	if (d.hasOwnProperty(key)) {
+	  d[key] = +d[key]
+	}
+      }
+      return d
+    }
+
+    function thresholdsTranslate(y1, y2, y1Thresholds, years) {
       var thresholds = y1Thresholds.slice() // Copy y1Thresholds
       for (i = 0; i < years.length; i++) {
 	yearObj = years[i]
@@ -1025,6 +1034,21 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       return ret.Smooth
     }
 
+    function getSmoothedProbs() {
+      d3.csv("/api/smoothed_csv", numSmooth, function(error, data) {
+	tempDict = {"one_five": [], "two": [], "three": [], "four": []}
+	for (i = 0; i < data.length; ++i) {
+	  var datum = data[i]
+	  for (var key in datum) {
+	    if (datum.hasOwnProperty(key) && key != "em") {
+	      var datumToPush = {"Smooth": datum[key], "em": datum.em}
+	      tempDict[key].push(datumToPush)
+	    }
+	  }
+	}
+      })
+    }
+
     //             --- DATA VARIABLES ---
 
     var thresholds2011 = [400, 1000, 2400]
@@ -1036,7 +1060,11 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
     var peak = Object.assign({}, default_peak)
     var em0 = {year: 2080, em: 1}
     var histData = []
+    var lastYear = {}
     var probs = [0, 0, 0, 0]
+    var medianTemp = 1
+    var medianB = 1.373418
+    var medianM = 0.0007436709
 
     //            --- CHART VARIABLES ---
     
@@ -1112,6 +1140,14 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 
     //               --- CHART FUNCTIONS
 
+    var tempFormat = d3.format(".1f")
+    var round = function(num, index) {
+      // Rounds num to index 0's.
+      // round(5839.4, 2) returns 5800
+      roundNum = Math.pow(10, index)
+      return Math.round(num/roundNum) * roundNum
+    }
+
     function drawHist(hist) {
       // Draws hist on graph. Does not update or delete old hists
       chart.append("path")
@@ -1135,26 +1171,43 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
     function drawLegend(futureArr) {
       var future = [].concat.apply([], futureArr); // Flatten array
       var sum = sumEm(future)
-
+      var temp = medianB + medianM * sum
+      
       chart.append("text")
 	.datum(sum)
 	.attr("class", "legend")
 	.attr("transform", function(d, i) {
-	  transx = width/4
-	  transy = height * 3/4
+	  var transx = width/4
+	  var transy = height * 3/4
 	  return "translate(" + width*3/4 + "," + ((height * 1 / 4)) + ")"
 	})
-	.text(function(d) {return d})
+	.text(function(d) {return round(d, 2)})
 	.style("fill", "blue")
 	.style("font-size", "20px")
+      
+      chart.append("text")
+	.datum(temp)
+	.attr("class", "median")
+	.attr("transform", function(d) {
+	  var transx = width/4
+	  var transy = height * 3/4 + 20
+	  return "translate(" + width*3/4 + "," + transy + ")"
+	})
+	.text(function(d) {return tempFormat(d)})
+	.style("font-size", "20px")
+	      
     }
 
     function updateLegend(futureArr) {
       var future = [].concat.apply([], futureArr); // Flatten array
       var sum = sumEm(future)
+      var temp = medianB + medianM * sum
       chart.select(".legend")
 	.datum(sum)
-	.text(function(d) {return d})
+	.text(function(d) {return round(d, 2)})
+      chart.select(".median")
+	.datum(temp)
+	.text(function(d) {return tempFormat(d)})
     }
 
     function updateFuture(futureArr) {
@@ -1167,9 +1220,29 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
     function drawNodes(defaultPeak, default0, histData) {
       
       function dragged_peak(d) {
-	d3.select(this).attr("cx", d3.event.x).attr("cy", d3.event.y);
-	peak.year = x.invert(d3.event.x)
-	peak.em = y.invert(d3.event.y)
+	// d3.select(this).attr("cx", d3.event.x).attr("cy", d3.event.y);
+	var year = x.invert(d3.event.x)
+	if (year < em0.year && year > histData[histData.length - 1].year) {
+	  peak.year = year
+	  d3.select(this).attr("cx", d3.event.x)
+	}
+	else if (year >= em0.year) {
+	  peak.year = em0.year
+	  d3.select(this).attr("cx", x(peak.year))
+	}
+	else if (year < lastYear.year) {
+	  peak.year = lastYear.year
+	  d3.select(this).attr("cx", x(peak.year))
+	}
+	var em = y.invert(d3.event.y)
+	if (em > lastYear.em) {
+	  peak.em = em
+	  d3.select(this).attr("cy", d3.event.y)
+	}
+	else {
+	  peak.em = lastYear.em + 0.01
+	  d3.select(this).attr("cy", y(peak.em))
+	}
 	future = futureData(histData, peak, em0)
 	futureArr = divideEmissions(future, thresholds2017)
 	updateFuture(futureArr)
@@ -1178,8 +1251,19 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       }
 
       function dragged_0(d) {
-	d3.select(this).attr("cx", d3.event.x);
-	em0.year = x.invert(d3.event.x)
+	var year = x.invert(d3.event.x)
+	if (year > peak.year && year < 2100) {
+	  d3.select(this).attr("cx", d3.event.x);
+	  em0.year = x.invert(d3.event.x)
+	}
+	else if (year < peak.year) {
+	  em0.year = peak.year
+	  d3.select(this).attr("cx", x(peak.year))
+	}
+	else {
+	  em0.year = 2100
+	  d3.select(this).attr("cx", x(2100))
+	}
 	future = futureData(histData, peak, em0)
 	futureArr = divideEmissions(future, thresholds2017)
 	updateFuture(futureArr)
@@ -1270,7 +1354,6 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	.attr("height", barHeight)
 	.attr("transform", function(d, i) {
 	  translate = barHeight * i + (1/2 + i) * barSpace
-	  console.log(translate)
 	  return "translate(0," + translate + ")"
 	})
 	.style("fill", function(d, i) {return colors[i]})
@@ -1315,22 +1398,15 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 
     d3.csv("/api/emissions_csv", toNum, function(error, data) {
       histData = data
+      console.log(histData)
+      lastYear = histData[histData.length - 1]
       var future = futureData(histData, peak, em0)
       thresholds2017 = thresholdsTranslate(2011, 2017, thresholds2011, data)
       var futureArr = divideEmissions(future, thresholds2017)
       makeChart(histData, futureArr)
     })
-
-    function addTempToDict(temp) {
-      d3.csv("/api/budget_prob/" + temp + ".csv", num, function(error, data) {
-	tempDict[temp] = data
-      })
-    }
     
-    for (i = 0; i < temps.length; ++i) {
-      temp = temps[i]
-      addTempToDict(temp)
-    }
+    getSmoothedProbs()
   }]);
 
 

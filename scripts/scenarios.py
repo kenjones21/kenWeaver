@@ -137,6 +137,34 @@ def emissionsSums(startYear):
             sums[pair] = theSum
     return sums
 
+def medianTemps():
+    medianDict = {}
+    string = "Temperature|Global Mean|MAGICC6|MED"
+    for datum in data:
+        model, scenario = datum["MODEL"], datum["SCENARIO"]
+        pair = (model, scenario)
+        variable = datum["VARIABLE"]
+        if variable == string:
+            if pair not in medianDict:
+                medianDict[pair] = {}
+            medianDict[pair] = datum
+            print(datum)
+    return medianDict
+
+def median2100():
+    medianDict = {}
+    string = "Temperature|Global Mean|MAGICC6|MED"
+    for datum in data:
+        model, scenario = datum["MODEL"], datum["SCENARIO"]
+        pair = (model, scenario)
+        variable = datum["VARIABLE"]
+        if variable == string:
+            if pair not in medianDict:
+                medianDict[pair] = {}
+            medianDict[pair] = float(datum['2100'])
+            print(datum)
+    return medianDict
+
 def exceedanceProbabilities():
     exceedanceDict = {}
     beginsWithString = "Temperature|Exceedance Probability|"
@@ -197,6 +225,25 @@ def sortXY(x, y):
     return xy[0], xy[1]
 
 def export(filename, x, yarr, columns):
+    for y in yarr:
+        if len(y) != len(x):
+            print(len(y), len(x))
+            raise ValueError("Arrays are different lengths")
+    f = open(filename, 'w')
+    for column in columns:
+        f.write(column)
+        f.write(",")
+    f.write("\n")
+    for i in range(0, len(x)):
+        f.write(str(x[i]))
+        for y in yarr:
+            f.write(",")
+            f.write(str(y[i]))
+        f.write("\n")
+    f.close()
+    return
+
+def exportProb(filename, x, yarr, columns):
     for y in yarr:
         if len(y) != len(x):
             print(len(y), len(x))
@@ -273,6 +320,7 @@ def squares(params):
     return squares1(gaussX, gaussY, sums, probs)
         
 readFile("../res/ar5_scenarios.csv")
+# med2100 = median2100()
 # temps = ["1.5", "2.0", "3.0", "4.0"]
 # columnNames = ["one_five", "two", "three", "four"]
 # smoothedExcProbs = []
@@ -289,7 +337,7 @@ readFile("../res/ar5_scenarios.csv")
 #     lowess = sm.nonparametric.lowess(probs, sums, frac=0.30)
 #     smoothedExcProbs.append(lowess)
 # export("../res/budget.csv", sums, smoothedExcProbs
-
+"""
 # Params:
 param1_5 = {"b": 97, "c": 890}
 # 1.5: 97, 890
@@ -301,16 +349,21 @@ param4 = {"b": 5114, "c": 2027}
 # 4.0: 5114, 2027
 temps = ["","one_five", "two", "three", "four"]
 allparams = [param1_5, param2, param3, param4]
-
+"""
 temp = "2.0"
 excProb = exceedanceProbabilities()
 d = maxExceedanceProbabilities(excProb, temp)
 e = emissionsSums(2017)
 f = exceedance2100(excProb, temp)
 merged = mergeExcSums(f, e)
+#mergedMedian = mergeExcSums(med2100, e)
+#sums, med = getXY(mergedMedian)
+#sums, med = sortXY(sums, med)
+
+# export("../res/median.csv", sums, [med], ["em", "medianTemp"])
 sums, probs = getXY(merged)
 sums, probs = sortXY(sums, probs)
-
+"""
 yFuns = []
 for i in range(0, 4):
     temp = temps[i]
@@ -320,19 +373,18 @@ for i in range(0, 4):
     print(len(gaussX), len(gaussY))
     yFuns.append(gaussY)
 export("../res/smoothed.csv", gaussX, yFuns, temps)
-
-"""    
-barr = np.linspace(95, 100, 20)
-carr = np.linspace(870, 910, 20)
-paramStart = [4000, 1200]
-minb = 0
-minc = 0
+"""
+barr = np.linspace(800, 1600, 40)
+carr = np.linspace(900, 1100, 40)
+#paramStart = [4000, 1200]
 fits = []
-optObj = opt.minimize(squares,paramStart)
-optX = optObj.x
+#optObj = opt.minimize(squares,paramStart)
+#optX = optObj.x
 #optX = [3000, 1200]
-print("b, c is ", optX)
+#print("b, c is ", optX)
 
+params = {}
+minsum = 99999999999
 for b in barr:
     params["b"] = b
     for c in carr:
@@ -354,7 +406,7 @@ fig.colorbar(im)
 ax.axis('tight')
 plt.show()
 print("Min b, c", b, c)
-
+"""
 params = {"b": optX[0], "c": optX[1]}
 m = np.linspace(min(sums) - 100, max(sums) + 100, 100)
 y = []
