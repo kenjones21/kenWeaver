@@ -1046,6 +1046,8 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	    }
 	  }
 	}
+	console.log(budget)
+	makeBarChart(budget)
       })
     }
 
@@ -1061,9 +1063,10 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
     var em0 = {year: 2080, em: 1}
     var histData = []
     var lastYear = {}
+    var budget = 0
     var probs = [0, 0, 0, 0]
     var medianTemp = 1
-    var medianB = 1.373418
+    var medianB = 1.38531
     var medianM = 0.0007436709
 
     //            --- CHART VARIABLES ---
@@ -1122,8 +1125,10 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       var futureArr = divideEmissions(future, thresholds2017)
       updateFuture(futureArr)
       updatePeak(peak)
-      updateLegend(futureArr)
-      updateBarWidth(futureArr)
+      future = [].concat.apply([], futureArr); // Flatten array
+      budget = sumEm(future)
+      updateLegend(budget)
+      updateBarWidth(budget)
     }
 
     $scope.committed = function() {
@@ -1134,8 +1139,10 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       updateFuture(futureArr)
       updatePeak(peak)
       updateEm0(em0)
-      updateLegend(futureArr)
-      updateBarWidth(futureArr)
+      future = [].concat.apply([], futureArr); // Flatten array
+      budget = sumEm(future)
+      updateLegend(budget)
+      updateBarWidth(budget)
     }
 
     //               --- CHART FUNCTIONS
@@ -1195,12 +1202,10 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	})
 	.text(function(d) {return tempFormat(d)})
 	.style("font-size", "20px")
-	      
+	.style("fill", "white")
     }
 
-    function updateLegend(futureArr) {
-      var future = [].concat.apply([], futureArr); // Flatten array
-      var sum = sumEm(future)
+    function updateLegend(sum) {
       var temp = medianB + medianM * sum
       chart.select(".legend")
 	.datum(sum)
@@ -1220,7 +1225,6 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
     function drawNodes(defaultPeak, default0, histData) {
       
       function dragged_peak(d) {
-	// d3.select(this).attr("cx", d3.event.x).attr("cy", d3.event.y);
 	var year = x.invert(d3.event.x)
 	if (year < em0.year && year > histData[histData.length - 1].year) {
 	  peak.year = year
@@ -1246,8 +1250,10 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	future = futureData(histData, peak, em0)
 	futureArr = divideEmissions(future, thresholds2017)
 	updateFuture(futureArr)
-	updateLegend(futureArr)
-	updateBarWidth(futureArr)
+	var future = [].concat.apply([], futureArr); // Flatten array
+	budget = sumEm(future)
+	updateLegend(budget)
+	updateBarWidth(budget)
       }
 
       function dragged_0(d) {
@@ -1256,19 +1262,23 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	  d3.select(this).attr("cx", d3.event.x);
 	  em0.year = x.invert(d3.event.x)
 	}
-	else if (year < peak.year) {
+	else if (year <= peak.year) {
+	  console.log("too far left")
 	  em0.year = peak.year
 	  d3.select(this).attr("cx", x(peak.year))
 	}
 	else {
+	  console.log("too far right")
 	  em0.year = 2100
 	  d3.select(this).attr("cx", x(2100))
 	}
 	future = futureData(histData, peak, em0)
 	futureArr = divideEmissions(future, thresholds2017)
+	var future = [].concat.apply([], futureArr); // Flatten array
+	budget = sumEm(future)
 	updateFuture(futureArr)
-	updateLegend(futureArr)
-	updateBarWidth(futureArr)
+	updateLegend(budget)
+	updateBarWidth(budget)
       }
 
       chart.append("circle")
@@ -1314,12 +1324,12 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       yAxis.tickPadding(15)
       
       chart.append("g")
-	.attr("class", "x_axis axis")
+	.attr("class", "x_axis axis emissions_axis")
 	.attr("transform", "translate(0," + height + ")")
 	.call(xAxis)
 
       chart.append("g")
-	.attr("class", "y_axis axis")
+	.attr("class", "y_axis axis emissions_axis")
 	.call(yAxis)
 	.append("text")
 	.attr("transform", "rotate(-90)")
@@ -1334,10 +1344,8 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       drawFuture(futureArr)
       drawLegend(futureArr)
       drawNodes(peak, em0, histData)
-      drawAxes()
       var emissionsSum = sumEm([].concat.apply([], futureArr))
-      makeBarChart(emissionsSum)
-      drawBarAxis()
+//      makeBarChart(emissionsSum)
       drawBarLines()
     }
 
@@ -1346,6 +1354,7 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	t = temps[i]
 	probs[i] = estimateExceedanceProbability(tempDict[t], emissionsSum)
       }
+      console.log(probs)
       barChart.selectAll(".prob")
 	.data(probs)
 	.enter().append("rect")
@@ -1359,15 +1368,15 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	.style("fill", function(d, i) {return colors[i]})
     }
 
-    function updateBarWidth(futureArr) {
-      var future = [].concat.apply([], futureArr)
-      var sum = sumEm(future)
+    function updateBarWidth(budget) {
+//      var future = [].concat.apply([], futureArr)
+//      var sum = sumEm(future)
       function check (l, max) {
 	return l < max
       }
       for (var i = 0; i < temps.length; ++i) {
 	t = temps[i]
-	probs[i] = estimateExceedanceProbability(tempDict[t], sum)
+	probs[i] = estimateExceedanceProbability(tempDict[t], budget)
       }
       barChart.selectAll(".prob")
 	.data(probs)
@@ -1378,9 +1387,8 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       var barXAxis = d3.axisBottom(barX)
       barXAxis.tickFormat(d3.format(".0%"))
       barChart.append("g")
-	.attr("class", "x_axis axis")
+	.attr("class", "x_axis axis emissions_axis")
 	.attr("transform", "translate(0," + barGraphHeight + ")")
-	.style("fill", "white")
 	.call(barXAxis)
     }
 
@@ -1388,7 +1396,7 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
       var x0 = barX(0.33333)
       var line = barChart.append("line")
 	  .attr("display", null)
-	  .style("stroke", "black")
+	  .style("stroke", "white")
       	  .style("stroke-dasharray", ("5, 2"))
 	  .attr("x1", x0)
 	  .attr("y1", 0)
@@ -1396,13 +1404,17 @@ app.controller('EmissionsController', ['$scope', '$location', '$http',
 	  .attr("y2", height);
     }
 
+    drawAxes()
+    drawBarAxis()
     d3.csv("/api/emissions_csv", toNum, function(error, data) {
       histData = data
-      console.log(histData)
       lastYear = histData[histData.length - 1]
       var future = futureData(histData, peak, em0)
       thresholds2017 = thresholdsTranslate(2011, 2017, thresholds2011, data)
+      console.log(thresholds2017)
       var futureArr = divideEmissions(future, thresholds2017)
+      future = [].concat.apply([], futureArr); // Flatten array
+      budget = sumEm(future)
       makeChart(histData, futureArr)
     })
     
