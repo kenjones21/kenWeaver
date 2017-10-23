@@ -1,7 +1,35 @@
-<div class="emissions">
-  <div class="chartDiv emissionsChart"></div>
-  <div>
-    <button ng-click="paris()">Paris</button>
-    <button ng-click="committed()">Committed</button>
+<div class="container-fluid emissions">
+  <div class="row">
+    <div class="col-8">
+      <svg id="emissionsChart" width="90%"></svg>
+      <button ng-click="paris()">Paris</button>
+      <button ng-click="committed()">Committed</button>
+      <button ng-click="rcp3()">RCP 2.6</button>
+    </div>
+    <div class="col">
+      <svg id="barChart"></svg>
+      <div id="stats" style="color:white">
+	<p id="rainfall">
+	  <span id="fire" class="stat"></span>
+	  increase in area burned in fires in parts of Western US
+	</p>
+	
+	<p>
+	  <span id="heavyRain" class="stat"></span>
+	  increase in heavy rainfall events
+	</p>
+	
+	<p>
+	  <span id="rain" class="stat"></span>
+	  change in rainfall totals in some areas
+	</p>
+	
+	<p>
+	  <span id="corn" class="stat"></span>
+	  reduction in US corn yields
+	</p>
+	
+      </div>
+    </div>
   </div>
 </div>
