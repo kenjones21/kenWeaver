@@ -1,6 +1,6 @@
 # Ken's Site
 This is Ken's website. It was created using Jeremy Keeler's MEAN-Template
-[here]{www.github.com/jer-keel/MEAN-Template}.
+[here](www.github.com/jer-keel/MEAN-Template).
 
 ### Technologies
 The tech and instruments used in this project are as follows:
