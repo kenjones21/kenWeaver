@@ -1,4 +1,0 @@
-{
-  "verbose": false,
-  "ignore": ["src/public/*", "src/stylus/*", "scripts/*"]
-}
