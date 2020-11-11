@@ -25,7 +25,7 @@ SECRET_KEY = 'ez5%+$_2@zpyda!j$#9s$rdaw2j@pc*kng5)gcu$lc9oe_i$hw'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['kenWeaver.me']
 
 
 # Application definition
