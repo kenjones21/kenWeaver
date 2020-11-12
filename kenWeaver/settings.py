@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['kenWeaver.me', 'localhost']
 INSTALLED_APPS = (
     'myProfile',
     'covid',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
