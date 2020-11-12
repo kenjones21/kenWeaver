@@ -17,8 +17,10 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 import myProfile.urls
+import covid.urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^covid/', include(covid.urls)),
     url(r'^', include(myProfile.urls)),
 ]
