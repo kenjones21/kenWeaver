@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['kenWeaver.me', 'localhost']
 INSTALLED_APPS = (
     'myProfile',
     'covid',
+    'corsheaders',
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,6 +44,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = (
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -102,3 +104,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"http://localhost:[0-9]*$",
+]
