@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { DataQuery } from '../dataQuery'
+import { DataQuery } from '../dataQuery';
+import { DailyDatum } from '../daily-datum';
+import { CovidDataService } from '../covid-data.service';
 
 @Component({
   selector: 'app-data-query',
@@ -12,7 +14,9 @@ import { DataQuery } from '../dataQuery'
 
 export class DataQueryComponent {
 
-  constructor(private http:HttpClient) { }
+  constructor(private http:HttpClient, private dataService: CovidDataService) { }
+
+  data: DailyDatum[] = [];
 
   states = ['Pennsylvania', 'Texas', 'Ohio']
   counties = ['Montgomery', 'Philadelphia']
@@ -23,23 +27,14 @@ export class DataQueryComponent {
 
   submitted = false;
 
-  constructUrl() {
-    const base_url = "http://localhost:8000/covid/data/?"
-    var params = new HttpParams();
-    params = params.set("start", this.model.start);
-    params = params.set("end", this.model.end);
-    params = params.set("county", this.model.county);
-    params = params.set("state", this.model.state);
-    return base_url.concat(params.toString());
+  getData(): void {
+    this.dataService.getData(this.model)
+      .subscribe(data => this.data = data);
   }
 
   onSubmit() {
-    console.log(this.diagnostic);
-    var url = this.constructUrl();
-    console.log(url);
-    this.http.get(url, {responseType: 'text'})
-      .subscribe((data: String) => console.log(data))
-    }
+    this.getData();
+  }
 
   // TODO: Remove this when we're done
   get diagnostic() { return JSON.stringify(this.model); }

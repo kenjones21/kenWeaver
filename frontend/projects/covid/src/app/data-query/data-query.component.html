@@ -20,4 +20,8 @@
 
     <button type="submit" class="btn btn-success" [disabled]="!dataQuery.form.valid">Submit</button>
   </form>
+
+  <ul>
+    <li *ngFor="let datum of data">{{datum.date}}: {{datum.case_count}}</li>
+  </ul>
 </div>
