@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { DataQuery } from '../dataQuery'
@@ -23,10 +23,22 @@ export class DataQueryComponent {
 
   submitted = false;
 
-    onSubmit() {
-	console.log(this.diagnostic);
-	this.http.get('http://localhost:8000/hello/', {responseType: 'text'})
-	    .subscribe((data: String) => console.log(data))
+  constructUrl() {
+    const base_url = "http://localhost:8000/covid/data/?"
+    var params = new HttpParams();
+    params = params.set("start", this.model.start);
+    params = params.set("end", this.model.end);
+    params = params.set("county", this.model.county);
+    params = params.set("state", this.model.state);
+    return base_url.concat(params.toString());
+  }
+
+  onSubmit() {
+    console.log(this.diagnostic);
+    var url = this.constructUrl();
+    console.log(url);
+    this.http.get(url, {responseType: 'text'})
+      .subscribe((data: String) => console.log(data))
     }
 
   // TODO: Remove this when we're done
