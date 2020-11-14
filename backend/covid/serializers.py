@@ -6,3 +6,9 @@ class DataSerializer(serializers.ModelSerializer):
         model = models.DailyDatum
         fields = ['case_count', 'death_count', 'county', 'date']
 
+class StateSerializer(serializers.ModelSerializer):
+    county_set = serializers.StringRelatedField(many=True)
+    
+    class Meta:
+        model = models.State
+        fields = ['name', 'county_set']

@@ -4,6 +4,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 
 import { DataQuery } from '../dataQuery';
 import { DailyDatum } from '../daily-datum';
+import { State } from '../state';
 import { CovidDataService } from '../covid-data.service';
 
 @Component({
@@ -17,15 +18,27 @@ export class DataQueryComponent {
   constructor(private http:HttpClient, private dataService: CovidDataService) { }
 
   data: DailyDatum[] = [];
+  states: State[] = [];
 
-  states = ['Pennsylvania', 'Texas', 'Ohio']
-  counties = ['Montgomery', 'Philadelphia']
+  ngOnInit() {
+    console.log('Init!');
+    console.log(this.state.county_set);
+    this.getStates();
+  }
+
+  county: string = ""
+  state: State = new State("Pennsylvania", [this.county])
   start = '2020-11-01'
   end = '2020-11-10'
 
-  model = new DataQuery(this.start, this.end, this.counties[0], this.states[0])
+  model = new DataQuery(this.start, this.end, this.county, this.state)
 
   submitted = false;
+
+  getStates(): void {
+    this.dataService.getStates()
+      .subscribe(states => this.states = states);
+  }
 
   getData(): void {
     this.dataService.getData(this.model)

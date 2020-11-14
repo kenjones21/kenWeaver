@@ -1,15 +1,13 @@
-{{diagnostic}}
-
 <div class="form-group">
   <form (ngSubmit)="onSubmit()" #dataQuery="ngForm">
     <label for="state">State</label>
     <select class="form-control" id="state" [(ngModel)]="model.state" name="state" required>
-      <option *ngFor="let state of states" [value]="state">{{state}}</option>
+      <option *ngFor="let state of states" [ngValue]="state">{{state.name}}</option>
     </select>
 
     <label for="county">County</label>
     <select class="form-control" id="county" [(ngModel)]="model.county" name="county">
-      <option *ngFor="let county of counties" [value]="county">{{county}}</option>
+      <option *ngFor="let county of model.state.county_set" [ngValue]="county">{{county}}</option>
     </select>
 
     <label for="start">Start Date</label>

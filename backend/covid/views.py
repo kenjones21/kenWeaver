@@ -1,10 +1,11 @@
 from django.shortcuts import render
+from django.db.models import Prefetch
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
-from covid.models import DailyDatum
-from covid.serializers import DataSerializer
+from covid.models import DailyDatum, County, State
+from covid.serializers import DataSerializer, StateSerializer
 
 class BadParameters(APIException):
     status_code = 400
@@ -31,3 +32,11 @@ def get_data(request):
     serializer = DataSerializer(data, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def states(request):
+    all_states = State.objects.all().prefetch_related(
+        Prefetch('county_set', queryset=County.objects.order_by('name'))).order_by('name')
+    serializer = StateSerializer(all_states, many=True)
+
+    return Response(serializer.data)
+    
