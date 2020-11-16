@@ -1,0 +1,15 @@
+FROM node:12.2.0
+
+# set working directory
+WORKDIR /code/frontend
+
+# add `/app/node_modules/.bin` to $PATH
+ENV PATH /code/frontend/node_modules/.bin:$PATH
+
+# install and cache app dependencies
+COPY package.json /code/frontend/package.json
+RUN npm install
+RUN npm install -g @angular/cli@7.3.9
+
+# add app
+COPY . /code/frontend
