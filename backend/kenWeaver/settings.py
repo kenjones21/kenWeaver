@@ -107,5 +107,5 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"http://localhost:[0-9]*$",
+    r"http://localhost:[0-9]*",
 ]

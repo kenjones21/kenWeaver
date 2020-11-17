@@ -13,7 +13,7 @@ export class CovidDataService {
   constructor(private http:HttpClient) { }
 
   constructUrl(dataQuery: DataQuery) {
-    const base_url = "http://localhost:8000/covid/data/?"
+    const base_url = "http://localhost:1337/covid/data/?"
     var params = new HttpParams();
     params = params.set("start", dataQuery.start);
     params = params.set("end", dataQuery.end);
@@ -28,7 +28,7 @@ export class CovidDataService {
   }
 
   getStates(): Observable<State[]> {
-    var url = 'http://localhost:8000/covid/states/'
+    var url = 'http://localhost:1337/covid/states/'
     return this.http.get<State[]>(url);
   }
 }
