@@ -18,6 +18,7 @@ services:
     volumes:
       - ./frontend/:/code/frontend
       - static_volume:/code/backend/static
+      - /code/frontend/node_modules
     ports:
       - 4200:4200
     env_file:
