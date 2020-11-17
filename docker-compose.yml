@@ -3,11 +3,12 @@ version: '3.7'
 services:
   django:
     build: ./backend
-    command: python start.py
+    command: sh ./start.sh
     volumes:
       - ./backend/:/code/backend
-    ports:
-      - 8000:8000
+      - static_volume:/code/backend/static
+    expose:
+      - 8000
     env_file:
       - ./backend/.env
 
@@ -20,3 +21,15 @@ services:
       - 4200:4200
     env_file:
       - ./frontend/.env
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:80
+    depends_on:
+      - django
+    volumes:
+      - static_volume:/code/backend/static
+
+volumes:
+  static_volume:
