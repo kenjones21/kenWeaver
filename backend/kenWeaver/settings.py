@@ -109,3 +109,21 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"http://localhost:[0-9]*",
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': '/code/backend/logs/debug.log'
+        }
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'DEBUG',
+    },
+}
